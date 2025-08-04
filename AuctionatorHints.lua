@@ -122,23 +122,24 @@ end
 -----------------------------------------
 
 function Atr_ShowHints ()
+       Atr_HideAllColumns();
 
-	Atr_NextBid_Heading:Hide();
-	Atr_Buyout_Heading:Hide();
-	Atr_Stacks_Heading:Hide();
+       local currentPane = Atr_GetCurrentPane();
 
-	Atr_Stacks_Heading:SetText (ZT("Source"));
+       currentPane.hints = Atr_BuildHints (currentPane.activeScan.itemName);
 
-	local currentPane = Atr_GetCurrentPane();
+       local numrows = currentPane.hints and #currentPane.hints or 0;
 
-	currentPane.hints = Atr_BuildHints (currentPane.activeScan.itemName);
-	
-	local numrows = currentPane.hints and #currentPane.hints or 0;
+       local sourceCol = BROWSE_COLUMNS[#BROWSE_COLUMNS];
+       if sourceCol and sourceCol.button then
+               sourceCol.button:SetText (ZT("Source"));
+       end
 
-	if (numrows > 0) then
-		Atr_NextBid_Heading:Show();
-		Atr_Stacks_Heading:Show();
-	end
+       if (numrows > 0) then
+               local bidCol = BROWSE_COLUMNS[1];
+               if bidCol and bidCol.button then bidCol.button:Show(); end
+               if sourceCol and sourceCol.button then sourceCol.button:Show(); end
+       end
 
 	local line;							-- 1 through 12 of our window to scroll
 	local dataOffset;					-- an index into our data calculated from the scroll offset

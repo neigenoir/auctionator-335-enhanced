@@ -705,23 +705,7 @@ local kPrefBaseSize = 466%71;
 -----------------------------------------
 
 function AtrSearch:UpdateArrows()
-
-	Atr_NextBid_ButtonArrow:Hide();
-	Atr_Stacks_ButtonArrow:Hide();
-	
-	if (self.sortHow == ATR_SORTBY_PRICE_ASC) then
-		Atr_NextBid_ButtonArrow:Show();
-		Atr_NextBid_ButtonArrow:SetTexCoord(0, 0.5625, 0, 1.0);
-	elseif (self.sortHow == ATR_SORTBY_PRICE_DES) then
-		Atr_NextBid_ButtonArrow:Show();
-		Atr_NextBid_ButtonArrow:SetTexCoord(0, 0.5625, 1.0, 0);
-	elseif (self.sortHow == ATR_SORTBY_NAME_ASC) then
-		Atr_Stacks_ButtonArrow:Show();
-		Atr_Stacks_ButtonArrow:SetTexCoord(0, 0.5625, 0, 1.0);
-	elseif (self.sortHow == ATR_SORTBY_NAME_DES) then
-		Atr_Stacks_ButtonArrow:Show();
-		Atr_Stacks_ButtonArrow:SetTexCoord(0, 0.5625, 1.0, 0);
-	end
+       -- arrow visuals removed
 end
 
 -----------------------------------------

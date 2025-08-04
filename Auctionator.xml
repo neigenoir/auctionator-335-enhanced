@@ -188,100 +188,24 @@
 	</Frame>
 
 
-	<Button name="AuctionatorEntryTemplate" virtual="true" hidden="true">
-	    <Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="" tile="true" tileSize="16" />
-		<Size><AbsDimension x="584" y="16" /></Size>		
-		<Frames>
-
-			<!-- Ставка -->
-			<Frame name="$parent_CurrentBid">
-				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-				<Size><AbsDimension x="120" y="16" /></Size>
-				<Frames>
-					<Frame name="$parent_Price" inherits="SmallMoneyFrameTemplate">
-						<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-						<Scripts>
-							<OnLoad>
-								SmallMoneyFrame_OnLoad(self);
-								MoneyFrame_SetType(self, "AUCTION");
-							</OnLoad>
-						</Scripts>
-					</Frame>
-				</Frames>
-			</Frame>
-
-			<!-- Выкуп -->
-			<Frame name="$parent_PerItem">
-				<Anchors><Anchor point="LEFT" relativeTo="$parent_CurrentBid" relativePoint="RIGHT"><Offset><AbsDimension x="5" y="0"/></Offset></Anchor></Anchors>
-				<Size><AbsDimension x="120" y="16" /></Size>
-				<Layers>
-					<Layer level="BACKGROUND">
-						<FontString name="$parent_Text" inherits="GameFontDarkGraySmall" justifyH="RIGHT">
-							<Anchors><Anchor point="RIGHT"><Offset><AbsDimension y="1" x="-16"/></Offset></Anchor></Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
-				<Frames>
-					<Frame name="$parent_Price" inherits="SmallMoneyFrameTemplate">
-						<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-						<Scripts>
-							<OnLoad>
-								SmallMoneyFrame_OnLoad(self);
-								MoneyFrame_SetType(self, "AUCTION");
-							</OnLoad>
-						</Scripts>
-					</Frame>
-				</Frames>
-			</Frame>
-
-			<!-- Количество -->
-			<Frame name="$parent_Quantity">
-				<Anchors><Anchor point="LEFT" relativeTo="$parent_PerItem" relativePoint="RIGHT"><Offset><AbsDimension x="5" y="0"/></Offset></Anchor></Anchors>
-				<Size><AbsDimension x="90" y="16" /></Size>
-				<Layers>
-					<Layer level="BACKGROUND">
-						<FontString name="$parent_Text" inherits="GameFontHighlightSmall" justifyH="RIGHT"/>
-					</Layer>
-				</Layers>
-			</Frame>
-
-			<!-- TimeLeft -->
-			<Frame name="$parent_TimeLeft">
-				<Anchors><Anchor point="LEFT" relativeTo="$parent_Quantity" relativePoint="RIGHT"><Offset><AbsDimension x="5" y="0"/></Offset></Anchor></Anchors>
-				<Size><AbsDimension x="60" y="16" /></Size>
-				<Layers>
-					<Layer level="BACKGROUND">
-						<FontString name="$parent_Text" inherits="GameFontHighlightSmall" justifyH="RIGHT"/>
-					</Layer>
-				</Layers>
-			</Frame>
-
-			<!-- Owner -->
-			<Frame name="$parent_Owner">
-				<Anchors><Anchor point="LEFT" relativeTo="$parent_TimeLeft" relativePoint="RIGHT"><Offset><AbsDimension x="5" y="0"/></Offset></Anchor></Anchors>
-				<Size><AbsDimension x="80" y="16" /></Size>
-				<Layers>
-					<Layer level="BACKGROUND">
-						<FontString name="$parent_Text" inherits="GameFontHighlightSmall" justifyH="CENTER"/>
-					</Layer>
-				</Layers>
-			</Frame>			
-		</Frames>
-
-		<PushedTexture file="Interface\HelpFrame\HelpFrameButton-Highlight">
-			<TexCoords left="0.25" right="0.35" top="0.0" bottom="0.6"/>
-		</PushedTexture>
-		<HighlightTexture file="Interface\HelpFrame\HelpFrameButton-Highlight" alphaMode="ADD">
-			<TexCoords left="0.035" right="0.04" top="0.2" bottom="0.25"/>
-		</HighlightTexture>
-		<Scripts>
-			<OnClick>
-				Atr_EntryOnClick();
-			</OnClick>
-			<OnEnter>Atr_ShowLineTooltip(self)</OnEnter>
-			<OnLeave>Atr_HideLineTooltip()</OnLeave>
-		</Scripts>
-	</Button>
+        <Button name="AuctionatorEntryTemplate" virtual="true" hidden="true">
+            <Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="" tile="true" tileSize="16" />
+                <Size><AbsDimension x="584" y="16" /></Size>
+                <PushedTexture file="Interface\HelpFrame\HelpFrameButton-Highlight">
+                        <TexCoords left="0.25" right="0.35" top="0.0" bottom="0.6"/>
+                </PushedTexture>
+                <HighlightTexture file="Interface\HelpFrame\HelpFrameButton-Highlight" alphaMode="ADD">
+                        <TexCoords left="0.035" right="0.04" top="0.2" bottom="0.25"/>
+                </HighlightTexture>
+                <Scripts>
+                        <OnLoad>Atr_BuildBrowseEntry(self);</OnLoad>
+                        <OnClick>
+                                Atr_EntryOnClick();
+                        </OnClick>
+                        <OnEnter>Atr_ShowLineTooltip(self)</OnEnter>
+                        <OnLeave>Atr_HideLineTooltip()</OnLeave>
+                </Scripts>
+        </Button>
 
 
 	<Button name="Atr_HEntryTemplate" virtual="true" hidden="true">
@@ -892,71 +816,31 @@
 			 <Button name="AuctionatorEntry14" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry13" relativePoint="BOTTOMLEFT"/></Anchors></Button>
 			 <Button name="AuctionatorEntry15" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry14" relativePoint="BOTTOMLEFT"/></Anchors></Button>
                                                                                                         
-			<Frame name="Atr_HeadingsBar">
-				<Size><AbsDimension x="605" y="64"/></Size>
-				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="6" y="-163"/></Offset></Anchor></Anchors>
-				<Layers>
-					<Layer level="ARTWORK">
-
-						<Texture name="$parentMiddle" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
-							<Size><AbsDimension x="605" y="64"/></Size>
-							<TexCoords left="0.1953125" right="0.8046875" top="0" bottom="1"/>
-						</Texture>
-
-						<FontString name="Atr_NextBid_Heading" inherits="GameFontHighlightSmall" text="Ставка" hidden="true" justifyH="CENTER">
-							<Size><AbsDimension x="120"/></Size>
-							<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="20" y="1"/></Offset></Anchor></Anchors>
-						</FontString>
-
-						<FontString name="Atr_Buyout_Heading" inherits="GameFontHighlightSmall" text="Выкуп" hidden="true" justifyH="CENTER">
-							<Size><AbsDimension x="120"/></Size>
-							<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="200" y="1"/></Offset></Anchor></Anchors>
-						</FontString>
-
-						<FontString name="Atr_Stacks_Heading" inherits="GameFontHighlightSmall" text="Current Auctions" hidden="true">
-							<Size><AbsDimension x="200"/></Size>
-							<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="380" y="1"/></Offset></Anchor></Anchors>
-						</FontString>
-
-						<Texture name="Atr_NextBid_ButtonArrow" file="Interface\Buttons\UI-SortArrow">
-							<Size><AbsDimension x="9" y="8"/></Size>
-							<Anchors><Anchor point="LEFT" relativeTo="Atr_NextBid_Heading" relativePoint="RIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
-						</Texture>
-
-						<Texture name="Atr_Stacks_ButtonArrow" file="Interface\Buttons\UI-SortArrow">
-							<Size><AbsDimension x="9" y="8"/></Size>
-							<Anchors><Anchor point="LEFT" relativeTo="Atr_Stacks_Heading" relativePoint="RIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
-						</Texture>
-
-					</Layer>
-				</Layers>
-				
-				<Frames>
-					<Button name="Atr_Back_Button" text="Back" inherits="UIPanelButtonTemplate"  hidden="true">
-						<Size><AbsDimension x="70" y="18"/></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="8" y="5"/></Offset></Anchor></Anchors>
-						<Scripts><OnClick>Atr_Onclick_Back()</OnClick></Scripts>
-						<NormalFont style="GameFontNormalSmall"/>
-						<HighlightFont style="GameFontHighlightSmall"/>
-						<DisabledFont style="GameFontDisableSmall"/>
-					</Button>
-
-					<Button name="Atr_NextBid_Button" enableMouse="true">
-						<Size><AbsDimension x="100" y="20"/></Size>
-						<Anchors><Anchor point="LEFT" relativeTo="Atr_NextBid_Heading" relativePoint="LEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-						<Scripts><OnClick>Atr_Onclick_Col1()</OnClick></Scripts>
-					</Button>
-
-					<Button name="Atr_Stacks_Button" enableMouse="true">
-						<Size><AbsDimension x="100" y="20"/></Size>
-						<Anchors><Anchor point="LEFT" relativeTo="Atr_Stacks_Heading" relativePoint="LEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-						<Scripts><OnClick>Atr_Onclick_Col3()</OnClick></Scripts>
-					</Button>
-
-
-				</Frames>
-			</Frame>
-
+                        <Frame name="Atr_HeadingsBar">
+                                <Size><AbsDimension x="605" y="64"/></Size>
+                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="6" y="-163"/></Offset></Anchor></Anchors>
+                                <Layers>
+                                        <Layer level="ARTWORK">
+                                                <Texture name="$parentMiddle" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
+                                                        <Size><AbsDimension x="605" y="64"/></Size>
+                                                        <TexCoords left="0.1953125" right="0.8046875" top="0" bottom="1"/>
+                                                </Texture>
+                                        </Layer>
+                                </Layers>
+                                <Scripts>
+                                        <OnLoad>Atr_BuildBrowseHeaders(self);</OnLoad>
+                                </Scripts>
+                                <Frames>
+                                        <Button name="Atr_Back_Button" text="Back" inherits="UIPanelButtonTemplate"  hidden="true">
+                                                <Size><AbsDimension x="70" y="18"/></Size>
+                                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="8" y="5"/></Offset></Anchor></Anchors>
+                                                <Scripts><OnClick>Atr_Onclick_Back()</OnClick></Scripts>
+                                                <NormalFont style="GameFontNormalSmall"/>
+                                                <HighlightFont style="GameFontHighlightSmall"/>
+                                                <DisabledFont style="GameFontDisableSmall"/>
+                                        </Button>
+                                </Frames>
+                        </Frame>
 			<Frame name="Atr_ListTabs" hidden="true">
 				<Size><AbsDimension x="250" y="40"/></Size>
 				<Anchors><Anchor point="BOTTOMRIGHT" relativeTo="Atr_HeadingsBar" relativePoint="TOPRIGHT"><Offset><AbsDimension x="0" y="-22"/></Offset></Anchor></Anchors>
@@ -1036,17 +920,7 @@
 				
 								</Button>
 
-					<Button name="Atr_NextBid_Button" text="Lowest Bid" inherits="Atr_Col_Heading_Template"  hidden="true">
-						<Size><AbsDimension x="100" y="20"/></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="46" y="-21"/></Offset></Anchor></Anchors>
-						<Scripts><OnClick>Atr_Onclick_Col1()</OnClick></Scripts>
-					</Button>
 
-					<Button name="Atr_Stacks_Button" text="Item Name" inherits="Atr_Col_Heading_Template"  hidden="true">
-						<Size><AbsDimension x="108" y="20"/></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="172" y="-21"/></Offset></Anchor></Anchors>
-						<Scripts><OnClick>Atr_Onclick_Col3()</OnClick></Scripts>
-					</Button>
 
 				</Frames>
 	</Frame>
