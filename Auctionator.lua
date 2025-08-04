@@ -12,11 +12,11 @@ gAtrZC = addonTable.zc;		-- share with AuctionatorDev
 
 -- Column descriptors used for building browse rows and headings
 BROWSE_COLUMNS = {
-  {name = "CurrentBid", width = 120, heading = ZT("Ставка")},
-  {name = "PerItem",    width = 120, heading = ZT("Выкуп")},
-  {name = "Quantity",   width = 90,  heading = ZT("Количество")},
-  {name = "TimeLeft",   width = 60,  heading = ZT("Время")},
-  {name = "Owner",      width = 80,  heading = ZT("Продавец")},
+  {name = "CurrentBid", width = 120, heading = "Ставка"},
+  {name = "PerItem",    width = 120, heading = "Выкуп"},
+  {name = "Quantity",   width = 90,  heading = "Количество"},
+  {name = "TimeLeft",   width = 60,  heading = "Время"},
+  {name = "Owner",      width = 80,  heading = "Продавец"},
 }
 
 function Atr_HideAllColumns()
@@ -30,7 +30,8 @@ end
 function Atr_ShowAllColumns()
   for _, col in ipairs(BROWSE_COLUMNS) do
     if col.button then
-      col.button:SetText(col.heading)
+      local text = ZT and ZT(col.heading) or col.heading
+      col.button:SetText(text)
       col.button:Show()
     end
   end
@@ -41,7 +42,8 @@ function Atr_BuildBrowseHeaders(parent)
   for _, col in ipairs(BROWSE_COLUMNS) do
     local button = CreateFrame("Button", "Atr_BrowseHeading"..col.name, parent, "Atr_Col_Heading_Template")
     button:SetWidth(col.width)
-    button:SetText(col.heading)
+    local text = ZT and ZT(col.heading) or col.heading
+    button:SetText(text)
     if prev then
       button:SetPoint("LEFT", prev, "RIGHT", 5, 0)
     else
