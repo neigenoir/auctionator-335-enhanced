@@ -12,11 +12,11 @@ gAtrZC = addonTable.zc;		-- share with AuctionatorDev
 
 -- Column descriptors used for building browse rows and headings
 BROWSE_COLUMNS = {
-  {name = "CurrentBid", width = 120, heading = "Ставка"},
-  {name = "PerItem",    width = 120, heading = "Выкуп"},
-  {name = "Quantity",   width = 90,  heading = "Количество"},
-  {name = "TimeLeft",   width = 60,  heading = "Время"},
-  {name = "Owner",      width = 80,  heading = "Продавец"},
+  {name = "CurrentBid", width = 120, heading = "Bid"},
+  {name = "PerItem",    width = 120, heading = "Buyout"},
+  {name = "Quantity",   width = 90,  heading = "Quantity"},
+  {name = "TimeLeft",   width = 60,  heading = "Time Left"},
+  {name = "Owner",      width = 80,  heading = "Seller"},
 }
 
 function Atr_HideAllColumns()
