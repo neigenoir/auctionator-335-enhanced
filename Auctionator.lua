@@ -60,7 +60,9 @@ function Atr_BuildBrowseEntry(row)
   for _, col in ipairs(BROWSE_COLUMNS) do
     local frame = CreateFrame("Frame", row:GetName() .. "_" .. col.name, row)
     frame:SetSize(col.width, 16)
-    frame:SetClipsChildren(true)
+    if frame.SetClipsChildren then
+      frame:SetClipsChildren(true)
+    end
     if prev then
       frame:SetPoint("LEFT", prev, "RIGHT", 5, 0)
     else
@@ -88,6 +90,8 @@ function Atr_BuildBrowseEntry(row)
       local text = frame:CreateFontString(frame:GetName().."_Text", "BACKGROUND", "GameFontHighlightSmall")
       text:SetJustifyH(justify)
       text:SetPoint("RIGHT", frame, "RIGHT", 0, 1)
+      text:SetWidth(col.width)
+      text:SetWordWrap(false)
     end
 
     prev = frame
