@@ -12,8 +12,8 @@ gAtrZC = addonTable.zc;		-- share with AuctionatorDev
 
 -- Column descriptors used for building browse rows and headings
 BROWSE_COLUMNS = {
-  {name = "CurrentBid", width = 120, heading = "Bid"},
   {name = "PerItem",    width = 120, heading = "Buyout"},
+  {name = "CurrentBid", width = 120, heading = "Bid"},
   {name = "Quantity",   width = 90,  heading = "Quantity"},
   {name = "TimeLeft",   width = 60,  heading = "Time Left"},
   {name = "Owner",      width = 80,  heading = "Seller"},
@@ -52,6 +52,7 @@ function Atr_BuildBrowseHeaders(parent)
     col.button = button
     prev = button
   end
+  Atr_ShowAllColumns()
 end
 
 function Atr_BuildBrowseEntry(row)
@@ -59,6 +60,7 @@ function Atr_BuildBrowseEntry(row)
   for _, col in ipairs(BROWSE_COLUMNS) do
     local frame = CreateFrame("Frame", row:GetName() .. "_" .. col.name, row)
     frame:SetSize(col.width, 16)
+    frame:SetClipsChildren(true)
     if prev then
       frame:SetPoint("LEFT", prev, "RIGHT", 5, 0)
     else
@@ -73,7 +75,10 @@ function Atr_BuildBrowseEntry(row)
 
       if col.name == "PerItem" then
         local text = frame:CreateFontString(frame:GetName().."_Text", "BACKGROUND", "GameFontDarkGraySmall")
-        text:SetPoint("RIGHT", price, "LEFT", -16, 1)
+        text:SetPoint("CENTER", frame, "CENTER", 0, 1)
+        text:SetWidth(col.width)
+        text:SetJustifyH("CENTER")
+        text:SetWordWrap(false)
       end
     else
       local justify = "RIGHT"
