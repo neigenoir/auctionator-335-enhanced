@@ -12,8 +12,8 @@ gAtrZC = addonTable.zc;		-- share with AuctionatorDev
 
 -- Column descriptors used for building browse rows and headings
 BROWSE_COLUMNS = {
-  {name = "PerItem",    width = 120, heading = "Buyout"},
   {name = "CurrentBid", width = 120, heading = "Bid"},
+  {name = "PerItem",    width = 120, heading = "Buyout"},
   {name = "Quantity",   width = 90,  heading = "Quantity"},
   {name = "TimeLeft",   width = 60,  heading = "Time Left"},
   {name = "Owner",      width = 80,  heading = "Seller"},
@@ -41,13 +41,13 @@ function Atr_BuildBrowseHeaders(parent)
   local prev
   for _, col in ipairs(BROWSE_COLUMNS) do
     local button = CreateFrame("Button", "Atr_BrowseHeading"..col.name, parent, "Atr_Col_Heading_Template")
-    button:SetWidth(col.width)
+    button:SetSize(col.width, 20)
     local text = ZT and ZT(col.heading) or col.heading
     button:SetText(text)
     if prev then
-      button:SetPoint("LEFT", prev, "RIGHT", 5, 0)
+      button:SetPoint("TOPLEFT", prev, "TOPRIGHT", 5, 0)
     else
-      button:SetPoint("LEFT", parent, "LEFT", 20, 1)
+      button:SetPoint("TOPLEFT", parent, "TOPLEFT", 20, -21)
     end
     col.button = button
     prev = button
