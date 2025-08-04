@@ -1710,10 +1710,14 @@ end
 
 function Atr_ShowItemNameAndTexture(itemName)
 
-	AuctionatorMessageFrame:Hide();
-	AuctionatorMessage2Frame:Hide();
+        AuctionatorMessageFrame:Hide();
+        AuctionatorMessage2Frame:Hide();
 
-	local scn = gCurrentPane.activeScan;
+        if (not gCurrentPane or not gCurrentPane.activeScan) then
+                return;
+        end
+
+        local scn = gCurrentPane.activeScan;
 
 	local color = "";
 	if (scn and not scn:IsNil()) then
@@ -1733,12 +1737,16 @@ end
 -----------------------------------------
 
 function Atr_GetCacheAgeText()
-	
-	local scn = gCurrentPane.activeScan;
-	
-	if (not scn or scn:IsNil() or scn.whenScanned == 0) then
-		return "";
-	end
+
+        if (not gCurrentPane or not gCurrentPane.activeScan) then
+                return "";
+        end
+
+        local scn = gCurrentPane.activeScan;
+
+        if (scn:IsNil() or scn.whenScanned == 0) then
+                return "";
+        end
 	
 	local ageSeconds = time() - scn.whenScanned;
 	
