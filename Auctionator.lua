@@ -10,6 +10,8 @@ local zc = addonTable.zc;
 
 gAtrZC = addonTable.zc;		-- share with AuctionatorDev
 
+local gCurrentPane
+
 -- Column descriptors used for building browse rows and headings
 BROWSE_COLUMNS = {
   {name = "CurrentBid", width = 120, heading = "Bid"},
@@ -18,6 +20,35 @@ BROWSE_COLUMNS = {
   {name = "TimeLeft",   width = 60,  heading = "Time Left"},
   {name = "Owner",      width = 80,  heading = "Seller"},
 }
+
+local browseSortCol = "PerItem"
+local browseSortAsc = true
+
+local BROWSE_SORT_FUNCS = {
+  CurrentBid = function(a) return a.nextBidPerItem or 0 end,
+  PerItem    = function(a) return a.itemPrice end,
+  Quantity   = function(a) return (a.count or 0) * (a.stackSize or 0) end,
+  TimeLeft   = function(a) return a.timeLeft or 0 end,
+  Owner      = function(a) return string.lower(a.owner or "") end,
+}
+
+function Atr_UpdateBrowseArrows()
+  for _, col in ipairs(BROWSE_COLUMNS) do
+    if col.button then
+      local arrow = col.button:GetNormalTexture()
+      if col.name == browseSortCol then
+        arrow:Show()
+        if browseSortAsc then
+          arrow:SetTexCoord(0, 0.5625, 0, 1)
+        else
+          arrow:SetTexCoord(0, 0.5625, 1, 0)
+        end
+      else
+        arrow:Hide()
+      end
+    end
+  end
+end
 
 function Atr_HideAllColumns()
   for _, col in ipairs(BROWSE_COLUMNS) do
@@ -49,10 +80,12 @@ function Atr_BuildBrowseHeaders(parent)
     else
       button:SetPoint("TOPLEFT", parent, "TOPLEFT", 20, -21)
     end
+    button:SetScript("OnClick", function() Atr_SortBrowseColumn(col.name) end)
     col.button = button
     prev = button
   end
   Atr_ShowAllColumns()
+  Atr_UpdateBrowseArrows()
 end
 
 function Atr_BuildBrowseEntry(row)
@@ -96,6 +129,31 @@ function Atr_BuildBrowseEntry(row)
 
     prev = frame
   end
+end
+
+function Atr_SortBrowseColumn(colName)
+  local sorter = BROWSE_SORT_FUNCS[colName]
+  if not sorter or not gCurrentPane or not gCurrentPane.activeScan then return end
+  if browseSortCol == colName then
+    browseSortAsc = not browseSortAsc
+  else
+    browseSortCol = colName
+    browseSortAsc = true
+  end
+  table.sort(gCurrentPane.activeScan.sortedData, function(a, b)
+    local av, bv = sorter(a), sorter(b)
+    if av == bv then
+      return a.itemPrice < b.itemPrice
+    end
+    if browseSortAsc then
+      return av < bv
+    else
+      return av > bv
+    end
+  end)
+  Atr_UpdateBrowseArrows()
+  FauxScrollFrame_SetOffset(AuctionatorScrollFrame, 0)
+  gCurrentPane.UINeedsUpdate = true
 end
 
 -----------------------------------------
@@ -215,8 +273,6 @@ local gSellPane;
 local gMorePane;
 local gActivePane;
 local gShopPane;
-
-local gCurrentPane;
 
 local gHistoryItemList = {};
 
@@ -3644,6 +3700,7 @@ function Atr_ShowCurrentAuctions()
 
        if (numrows > 0) then
                Atr_ShowAllColumns();
+               Atr_UpdateBrowseArrows();
 
                if (gCurrentPane.activeSearch) then
                        gCurrentPane.activeSearch:UpdateArrows();
