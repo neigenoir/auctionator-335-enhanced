@@ -4089,18 +4089,16 @@ function Atr_EntryOnClick()
 	else												gCurrentPane.hintsIndex = entryIndex;
 	end
 
-	if (Atr_ShowingSearchSummary()) then
-		local scn = gCurrentPane.activeSearch.sortedScans[entryIndex];
-
-		FauxScrollFrame_SetOffset (AuctionatorScrollFrame, 0);
-		gCurrentPane.activeScan = scn;
-		gCurrentPane.currIndex = scn:FindMatchByYours ();
-		gCurrentPane.SS_hilite_itemName = scn.itemName;
-		gCurrentPane.UINeedsUpdate = true;
-	else
-		Atr_HighlightEntry (entryIndex);
-		Atr_UpdateRecommendation(true);
-	end
+       if (Atr_ShowingSearchSummary()) then
+               local scn = gCurrentPane.activeSearch.sortedScans[entryIndex]
+               if scn then
+                       Atr_Search_Box:SetText(scn.itemName)
+                       gCurrentPane:DoSearch(scn.itemName, true, AUCTIONATOR_CACHE_THRESHOLD)
+               end
+       else
+               Atr_HighlightEntry (entryIndex);
+               Atr_UpdateRecommendation(true);
+       end
 
 	PlaySound ("igMainMenuOptionCheckBoxOn");
 end
