@@ -821,9 +821,15 @@ function Atr_Init()
 	recommendElements[2] = getglobal ("Atr_RecommendPerItem_Text");
 	recommendElements[3] = getglobal ("Atr_RecommendPerItem_Price");
 	recommendElements[4] = getglobal ("Atr_RecommendPerStack_Text");
-	recommendElements[5] = getglobal ("Atr_RecommendPerStack_Price");
-	recommendElements[6] = getglobal ("Atr_Recommend_Basis_Text");
-	recommendElements[7] = getglobal ("Atr_RecommendItem_Tex");
+        recommendElements[5] = getglobal ("Atr_RecommendPerStack_Price");
+        recommendElements[6] = getglobal ("Atr_Recommend_Basis_Text");
+        recommendElements[7] = getglobal ("Atr_RecommendItem_Tex");
+
+        Atr_RecommendPerItem_Text:Hide();
+        Atr_RecommendPerItem_Price:Hide();
+        Atr_RecommendPerStack_Text:Hide();
+        Atr_RecommendPerStack_Price:Hide();
+        Atr_Recommend_Basis_Text:Hide();
 	
 	-- Initialize cache age display as hidden
 	if (Atr_CacheAge_Text) then
@@ -1870,10 +1876,18 @@ function Atr_ClearCurrent()
 		gCurrentPane.activeScan = Atr_FindScan(nil);
 	end
 	
-	-- Clear the recommendation text
-	if (Atr_Recommend_Text) then
-		Atr_Recommend_Text:SetText("");
-	end
+        -- Clear the recommendation text
+        if (Atr_Recommend_Text) then
+                Atr_Recommend_Text:SetText("");
+        end
+
+        if (Atr_ItemInfo_Total_Text) then
+                Atr_ItemInfo_Total_Text:SetText("");
+                Atr_ItemInfo_Median_Text:SetText("");
+                Atr_ItemInfo_P5_Text:SetText("");
+                Atr_ItemInfo_P10_Text:SetText("");
+                Atr_ItemInfo_P25_Text:SetText("");
+        end
 	
 	-- Clear any current message
 	Atr_SetMessage("");
@@ -2190,6 +2204,25 @@ end
 
 
 
+
+-----------------------------------------
+
+local function Atr_GetPricePercentile(scan, pct)
+        if not scan then return nil end
+        local total = scan:GetNumAvailable();
+        if total == 0 then return nil end
+        local target = math.ceil(total * pct / 100);
+        local count = 0;
+        for i = 1, #scan.sortedData do
+                local data = scan.sortedData[i];
+                count = count + data.count * data.stackSize;
+                if count >= target then
+                        return data.itemPrice;
+                end
+        end
+        return nil;
+end
+
 -----------------------------------------
 
 function Atr_UpdateRecommendation (updatePrices)
@@ -2274,38 +2307,55 @@ function Atr_UpdateRecommendation (updatePrices)
 	
 	local new_Item_StartPrice = Atr_CalcStartPrice (new_Item_BuyoutPrice);
 
-	--Atr_ShowElems (recommendElements);
-	AuctionatorMessageFrame:Hide();
-	AuctionatorMessage2Frame:Hide();
+        --Atr_ShowElems (recommendElements);
+        AuctionatorMessageFrame:Hide();
+        AuctionatorMessage2Frame:Hide();
 
-	Atr_Recommend_Text:SetText (ZT("Recommended Buyout Price"));
-	Atr_RecommendPerStack_Text:SetText (string.format (ZT("for your stack of %d"), Atr_StackSize()));
+        local scn = gCurrentPane.activeScan;
+        if (not scn) then
+                return;
+        end
+        local color = "";
+        if (not scn:IsNil()) then
+                color = "|cff"..zc.RGBtoHEX (scn.itemTextColor[1], scn.itemTextColor[2], scn.itemTextColor[3]);
+        end
+        Atr_Recommend_Text:SetText (color..scn.itemName);
 
-	Atr_SetTextureButton ("Atr_RecommendItem_Tex", Atr_StackSize(), gCurrentPane.activeScan.itemLink);
+        Atr_SetTextureButton ("Atr_RecommendItem_Tex", Atr_StackSize(), scn.itemLink);
 
-	MoneyFrame_Update ("Atr_RecommendPerItem_Price",  zc.round(new_Item_BuyoutPrice));
-	MoneyFrame_Update ("Atr_RecommendPerStack_Price", zc.round(new_Item_BuyoutPrice * Atr_StackSize()));
+        Atr_RecommendPerStack_Text:Hide();
+        Atr_RecommendPerItem_Text:Hide();
+        Atr_RecommendPerStack_Price:Hide();
+        Atr_RecommendPerItem_Price:Hide();
+        Atr_Recommend_Basis_Text:Hide();
 
-	if (updatePrices) then
-		MoneyInputFrame_SetCopper (Atr_StackPrice,		new_Item_BuyoutPrice * Atr_StackSize());
-		MoneyInputFrame_SetCopper (Atr_StartingPrice, 	new_Item_StartPrice * Atr_StackSize());
-		MoneyInputFrame_SetCopper (Atr_ItemPrice,		new_Item_BuyoutPrice);
-	end
-	
-	local cheapestStack = gCurrentPane.activeScan.bestPrices[Atr_StackSize()];
+        if (updatePrices) then
+                MoneyInputFrame_SetCopper (Atr_StackPrice,              new_Item_BuyoutPrice * Atr_StackSize());
+                MoneyInputFrame_SetCopper (Atr_StartingPrice,   new_Item_StartPrice * Atr_StackSize());
+                MoneyInputFrame_SetCopper (Atr_ItemPrice,               new_Item_BuyoutPrice);
+        end
 
-	Atr_Recommend_Basis_Text:SetTextColor (1,1,1);
+        local totalAuctions = 0;
+        for i = 1, #scn.sortedData do
+                totalAuctions = totalAuctions + scn.sortedData[i].count;
+        end
 
-	if (Atr_ShowingHints()) then
-		Atr_Recommend_Basis_Text:SetTextColor (.8,.8,1);
-		Atr_Recommend_Basis_Text:SetText ("("..ZT("based on").." "..basedata.sourceText..")");
-	elseif (gCurrentPane.activeScan.absoluteBest and basedata.stackSize == gCurrentPane.activeScan.absoluteBest.stackSize and basedata.buyoutPrice == gCurrentPane.activeScan.absoluteBest.buyoutPrice) then
-		Atr_Recommend_Basis_Text:SetText ("("..ZT("based on cheapest current auction")..")");
-	elseif (cheapestStack and basedata.stackSize == cheapestStack.stackSize and basedata.buyoutPrice == cheapestStack.buyoutPrice) then
-		Atr_Recommend_Basis_Text:SetText ("("..ZT("based on cheapest stack of the same size")..")");
-	else
-		Atr_Recommend_Basis_Text:SetText ("("..ZT("based on selected auction")..")");
-	end
+        local totalItems = scn:GetNumAvailable();
+        local median = Atr_GetPricePercentile(scn, 50);
+        local p5 = Atr_GetPricePercentile(scn, 5);
+        local p10 = Atr_GetPricePercentile(scn, 10);
+        local p25 = Atr_GetPricePercentile(scn, 25);
+
+        if Atr_ItemInfo_Total_Text then
+                Atr_ItemInfo_Total_Text:SetText(string.format("всего %d штук на %d аукционах", totalItems, totalAuctions));
+                Atr_ItemInfo_Median_Text:SetText("медианная цена за штуку: "..(median and zc.priceToMoneyString(median) or "—"));
+                Atr_ItemInfo_P5_Text:SetText("процентиль 5 цены за штуку: "..(p5 and zc.priceToMoneyString(p5) or "—"));
+                Atr_ItemInfo_P10_Text:SetText("процентиль 10 цены за штуку: "..(p10 and zc.priceToMoneyString(p10) or "—"));
+                Atr_ItemInfo_P25_Text:SetText("процентиль 25 цены за штуку: "..(p25 and zc.priceToMoneyString(p25) or "—"));
+        end
+
+        Atr_UpdateCacheAgeDisplay();
+
 
 end
 
