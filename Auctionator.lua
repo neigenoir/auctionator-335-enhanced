@@ -2185,11 +2185,14 @@ end
 
 function Atr_ShowingSearchSummary ()
 
-	if (gCurrentPane.activeSearch and gCurrentPane.activeSearch.searchText ~= "" and gCurrentPane:IsScanEmpty() and gCurrentPane.activeSearch:NumScans() > 0) then
-		return true;
-	end
-	
-	return false;
+       if (gCurrentPane.activeSearch
+               and gCurrentPane.activeSearch.searchText ~= ""
+               and gCurrentPane:IsScanEmpty()
+               and gCurrentPane.activeSearch:NumScans() > 1) then
+               return true;
+       end
+
+       return false;
 end
 
 -----------------------------------------
