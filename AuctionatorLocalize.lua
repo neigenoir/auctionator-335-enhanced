@@ -1,3 +1,4 @@
+-- AuctionatorLocalize.lua - part of Auctionator addon
 
 local addonName, addonTable = ...; 
 local zc = addonTable.zc;

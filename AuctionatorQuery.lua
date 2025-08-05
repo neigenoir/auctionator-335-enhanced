@@ -1,3 +1,4 @@
+-- AuctionatorQuery.lua - part of Auctionator addon
 -----------------------------------------
 
 AtrQuery = {};
@@ -5,6 +6,7 @@ AtrQuery.__index = AtrQuery;
 
 -----------------------------------------
 
+-- Creates a new query object used to track auction pages.
 function Atr_NewQuery ()
 
 	local query = {};
@@ -19,6 +21,7 @@ end
 
 -----------------------------------------
 
+-- Determines if the given page duplicates the previously seen page.
 function AtrQuery:CheckForDuplicatePage (pagenum)
 
 	local numBatchAuctions = GetNumAuctionItems("list");
@@ -98,6 +101,7 @@ end
 
 -----------------------------------------
 
+-- Returns true if the page number corresponds to the final results page.
 function AtrQuery:IsLastPage (pagenum)
 
 	local _, totalAuctions = GetNumAuctionItems("list");
@@ -107,6 +111,7 @@ end
 
 -----------------------------------------
 
+-- Creates a unique identifier for an auction entry based on its parameters.
 function AtrQuery:BuildItemIDstr(name, count, minBid, buyoutPrice, bidAmount)
 
 	if (name) then
