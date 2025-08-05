@@ -52,6 +52,10 @@ function AtrPane:DoSearch (searchText, exact, rescanThreshold, callback)
 	Atr_ClearAll();		-- it's fast, might as well just do it now for cleaner UE
 	
 	self.UINeedsUpdate = false;		-- will be set when scan finishes
+
+	browseSortCol = "PerItem";	-- reset sort state for new searches
+	browseSortAsc = true;
+	Atr_UpdateBrowseArrows();
 			
 	self.activeSearch = Atr_NewSearch (searchText, exact, rescanThreshold, callback);
 	
@@ -67,9 +71,18 @@ function AtrPane:DoSearch (searchText, exact, rescanThreshold, callback)
 		else
 			self.UINeedsUpdate = true;
 			cacheHit = true;
+
+			if (self.activeScan.sortedData) then
+				table.sort(self.activeScan.sortedData, Atr_SortAuctionData);
+			end
+
+			browseSortCol = "PerItem";
+			browseSortAsc = true;
+			Atr_UpdateBrowseArrows();
 		end
 	end
 	
+	Atr_UpdateItemInfo();
 	return cacheHit;
 end
 
