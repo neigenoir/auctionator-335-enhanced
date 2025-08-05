@@ -296,11 +296,11 @@
                                 </FontString>
 
                                 <FontString name="Atr_ItemInfo_Median_Text" inherits="GameFontHighlightSmall" text="">
-                                        <Anchors><Anchor point="TOPLEFT" relativeTo="Atr_ItemInfo_Total_Text"><Offset><AbsDimension x="160" y="0"/></Offset></Anchor></Anchors>
+                                        <Anchors><Anchor point="TOPLEFT" relativeTo="Atr_ItemInfo_Auc_Text"><Offset><AbsDimension x="0" y="-15"/></Offset></Anchor></Anchors>
                                 </FontString>
 
                                 <FontString name="Atr_ItemInfo_P5_Text" inherits="GameFontHighlightSmall" text="">
-                                        <Anchors><Anchor point="TOPLEFT" relativeTo="Atr_ItemInfo_Median_Text"><Offset><AbsDimension x="0" y="-15"/></Offset></Anchor></Anchors>
+                                        <Anchors><Anchor point="TOPLEFT" relativeTo="Atr_ItemInfo_Total_Text"><Offset><AbsDimension x="160" y="0"/></Offset></Anchor></Anchors>
                                 </FontString>
 
                 <FontString name="Atr_ItemInfo_P10_Text" inherits="GameFontHighlightSmall" text="">

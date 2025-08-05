@@ -2233,8 +2233,23 @@ local function Atr_GetPricePercentile(scan, pct)
 end
 
 function Atr_UpdateItemInfo()
-        local scan = gCurrentPane and gCurrentPane.activeScan
+        local pane = gCurrentPane
+        local scan = pane and pane.activeScan
         if not scan or not Atr_ItemInfo_Total_Text then return end
+
+        local function clear()
+                Atr_ItemInfo_Total_Text:SetText("")
+                if Atr_ItemInfo_Auc_Text then Atr_ItemInfo_Auc_Text:SetText("") end
+                Atr_ItemInfo_Median_Text:SetText("")
+                Atr_ItemInfo_P5_Text:SetText("")
+                Atr_ItemInfo_P10_Text:SetText("")
+                Atr_ItemInfo_P25_Text:SetText("")
+        end
+
+        if pane:GetProcessingState() ~= KM_NULL_STATE or #scan.sortedData == 0 then
+                clear()
+                return
+        end
 
         local totalAuctions = 0
         for i = 1, #scan.sortedData do
@@ -2243,7 +2258,7 @@ function Atr_UpdateItemInfo()
 
         local totalItems = scan:GetNumAvailable()
         local median = Atr_GetPricePercentile(scan, 50)
-        local p5 = Atr_GetPricePercentile(scan, 5)
+        local p05 = Atr_GetPricePercentile(scan, 5)
         local p10 = Atr_GetPricePercentile(scan, 10)
         local p25 = Atr_GetPricePercentile(scan, 25)
 
@@ -2256,7 +2271,7 @@ function Atr_UpdateItemInfo()
                 Atr_ItemInfo_Auc_Text:SetText(string.format("всего %d аукционов", totalAuctions))
         end
         Atr_ItemInfo_Median_Text:SetText(lbl("m:")..(median and zc.priceToMoneyString(median) or "—"))
-        Atr_ItemInfo_P5_Text:SetText(lbl("p5:")..(p5 and zc.priceToMoneyString(p5) or "—"))
+        Atr_ItemInfo_P5_Text:SetText(lbl("p05:")..(p05 and zc.priceToMoneyString(p05) or "—"))
         Atr_ItemInfo_P10_Text:SetText(lbl("p10:")..(p10 and zc.priceToMoneyString(p10) or "—"))
         Atr_ItemInfo_P25_Text:SetText(lbl("p25:")..(p25 and zc.priceToMoneyString(p25) or "—"))
 end
