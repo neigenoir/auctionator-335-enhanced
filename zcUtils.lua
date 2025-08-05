@@ -1,3 +1,4 @@
+-- zcUtils.lua - part of Auctionator addon
 
 -- Zirco's utilities
 

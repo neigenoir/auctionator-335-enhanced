@@ -1,3 +1,4 @@
+-- Auctionator.lua - part of Auctionator addon
 
 AuctionatorVersion = "???";		-- set from toc upon loading
 AuctionatorAuthor  = "Zirco";

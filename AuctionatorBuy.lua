@@ -1,3 +1,4 @@
+-- AuctionatorBuy.lua - part of Auctionator addon
 
 local addonName, addonTable = ...; 
 local zc = addonTable.zc;
@@ -26,6 +27,7 @@ local gAtr_Buy_Pass;
 
 -----------------------------------------
 
+-- Prints internal state information for debugging the buy logic.
 function Atr_Buy_Debug1 (yellow)
 
 	if (gBuyState == ATR_BUY_NULL)										then asstr = "ATR_BUY_NULL"; end;
@@ -46,6 +48,7 @@ end
 
 -----------------------------------------
 
+-- Resets the buying process to its initial state.
 function Atr_ClearBuyState()
 
 	gBuyState = ATR_BUY_NULL;
@@ -55,6 +58,7 @@ end
 
 -----------------------------------------
 
+-- Starts the buyout workflow for the selected auction listing.
 function Atr_Buy1_Onclick ()
 	gAtr_Buy_IsBid = false
 
@@ -100,6 +104,7 @@ end
 
 -----------------------------------------
 
+-- Starts the bidding workflow for the selected auction listing.
 function Atr_Bid_Onclick()
 
 	if not Atr_ShowingCurrentAuctions() then return end
@@ -149,6 +154,7 @@ end
 
 -----------------------------------------
 
+-- Stores the page to query and waits until the AH can accept it.
 function Atr_Buy_QueueQuery (page)
 
 	gAtr_Buy_CurPage = page;
@@ -163,6 +169,7 @@ end
 
 -----------------------------------------
 
+-- Sends the previously queued query to the auction house.
 function Atr_Buy_SendQuery ()
 
 	if (CanSendAuctionQuery()) then
@@ -181,6 +188,7 @@ local prevBuyState;
 
 -----------------------------------------
 
+-- Waits for the AH throttle before sending the next query.
 function Atr_Buy_Idle ()
 
 	if (gBuyState ~= prevBuyState) then
@@ -218,6 +226,7 @@ end
 
 -----------------------------------------
 
+-- Responds to AUCTION_ITEM_LIST_UPDATE events during the buy process.
 function Atr_Buy_OnAuctionUpdate()
 
 --	Atr_Buy_Debug1();
@@ -231,6 +240,7 @@ end
 
 -----------------------------------------
 
+-- Scans query results to identify auctions matching the desired item.
 function Atr_Buy_CheckForMatches ()
 
 	gBuyState = ATR_BUY_PROCESSING_QUERY_RESULTS;
@@ -264,12 +274,14 @@ end
 
 -----------------------------------------
 
+-- Purchases matching auctions once they are identified.
 function Atr_Buy_BuyMatches ()
 	return Atr_Buy_CountMatches (true);
 end
 
 -----------------------------------------
 
+-- Updates cached scan data after a bid is placed.
 local function AuctionatorUpdateBidInScan(itemName, stackSize,
 	oldNextBid, minIncrement)
 	local scan = Atr_FindScan(itemName)
@@ -285,6 +297,7 @@ local function AuctionatorUpdateBidInScan(itemName, stackSize,
 	end
 end
 
+-- Counts matching auctions and optionally buys them.
 function Atr_Buy_CountMatches(andBuy)
 
 	local numMatches		= 0;
@@ -359,6 +372,7 @@ end
 
 -----------------------------------------
 
+-- Updates the confirmation dialog with current match counts and pricing.
 function Atr_Buy_Confirm_Update()
     if not gAtr_Buy_BuyoutPrice then return end   -- ← добавьте проверку
 
@@ -371,6 +385,7 @@ end
 
 -----------------------------------------
 
+-- Either queues the next page query or cancels depending on auction data.
 function Atr_Buy_NextPage_Or_Cancel ( queueIf )
 
 	if (Atr_Buy_IsComplete()) then
@@ -390,6 +405,7 @@ end
 
 -----------------------------------------
 
+-- Determines if the desired quantity has been purchased.
 function Atr_Buy_IsComplete ()
 
 	if (gAtr_Buy_NumUserWants ~= -1 and gAtr_Buy_NumUserWants <= gAtr_Buy_NumBought) then
@@ -406,6 +422,7 @@ end
 
 -----------------------------------------
 
+-- Checks if the first scan through available pages is done.
 function Atr_Buy_IsFirstPassComplete ()
 
 	if (gAtr_Buy_Query:IsLastPage(gAtr_Buy_CurPage) and gAtr_Buy_Pass == 1) then
@@ -418,6 +435,7 @@ end
 
 -----------------------------------------
 
+-- Executes the purchase when the user confirms the transaction.
 function Atr_Buy_Confirm_OK ()
 
 	if (gAtr_Buy_NumUserWants == -1) then
@@ -450,6 +468,7 @@ end
 
 -----------------------------------------
 
+-- Waits for bought auctions to disappear from the listing before continuing.
 function Atr_Buy_Wait_For_Bought_To_Clear ()
 
 	zc.msg_dev ("Atr_Buy_Wait_For_Bought_To_Clear: ", time() - gAtr_Buy_Waiting_Start);
@@ -458,6 +477,7 @@ end
 
 -----------------------------------------
 
+-- Cancels the buying process and optionally displays an error message.
 function Atr_Buy_Cancel (msg)
 	
 	gBuyState = ATR_BUY_NULL;
