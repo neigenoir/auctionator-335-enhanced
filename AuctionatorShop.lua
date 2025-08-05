@@ -250,13 +250,15 @@ function Atr_Shop_OnFinishScan ()
 		
 	end
 
-	if (#currentPane.activeScan.sortedData > 0) then
-		currentPane.currIndex = 1;
-	end
+        if (#currentPane.activeScan.sortedData > 0) then
+                currentPane.currIndex = 1;
+        end
 
-	currentPane.UINeedsUpdate = true;
-	
-	Atr_Search_Button:Enable();
+        Atr_UpdateItemInfo();
+
+        currentPane.UINeedsUpdate = true;
+
+        Atr_Search_Button:Enable();
 end
 
 
@@ -501,11 +503,11 @@ function Atr_Shop_UpdateUI ()
 		
 	end
 	
-	if (currentPane.activeSearch:NumScans() > 1 and not currentPane:IsScanEmpty()) then
-		Atr_Back_Button:Show();
-	else
-		Atr_Back_Button:Hide();
-	end
+        if (currentPane.searchSummary or (currentPane.activeSearch:NumScans() > 1 and not currentPane:IsScanEmpty())) then
+                Atr_Back_Button:Show();
+        else
+                Atr_Back_Button:Hide();
+        end
 	
 end
 

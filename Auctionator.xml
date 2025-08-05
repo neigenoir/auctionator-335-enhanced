@@ -264,9 +264,9 @@
 					</Font>
 				</FontString>
 
-				<FontString name="Atr_Recommend_Text" inherits="GameFontNormal" text="Recommended buyout price">
-					<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="77" y="-98"/></Offset></Anchor></Anchors>
-				</FontString>
+                                <FontString name="Atr_Recommend_Text" inherits="GameFontNormal" text="">
+                                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="77" y="-82"/></Offset></Anchor></Anchors>
+                                </FontString>
 
 				<FontString name="Atr_Recommend_Basis_Text" inherits="GameFontHighlightSmall" text="based on">
 					<Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="Atr_Recommend_Text"><Offset><AbsDimension x="20" y="-2"/></Offset></Anchor></Anchors>
@@ -280,15 +280,39 @@
 					<Anchors><Anchor point="TOPLEFT" relativeTo="Atr_Recommend_Text"><Offset><AbsDimension x="152" y="-51"/></Offset></Anchor></Anchors>
 				</FontString>
 
-				<FontString name="Atr_CacheAge_Text" inherits="GameFontHighlightSmall" text="">
-					<Anchors><Anchor point="TOPLEFT" relativeTo="Atr_Recommend_Text"><Offset><AbsDimension x="0" y="-20"/></Offset></Anchor></Anchors>
-					<Font>
-						<Color r="0.7" g="0.7" b="0.7"/>
-					</Font>
-				</FontString>
-			</Layer>
+                                <FontString name="Atr_CacheAge_Text" inherits="GameFontHighlightSmall" text="">
+                                        <Anchors><Anchor point="TOPLEFT" relativeTo="Atr_Recommend_Text"><Offset><AbsDimension x="0" y="-20"/></Offset></Anchor></Anchors>
+                                        <Font>
+                                                <Color r="0.7" g="0.7" b="0.7"/>
+                                        </Font>
+                                </FontString>
 
-		</Layers>
+                                <FontString name="Atr_ItemInfo_Total_Text" inherits="GameFontHighlightSmall" text="">
+                                        <Anchors><Anchor point="TOPLEFT" relativeTo="Atr_CacheAge_Text"><Offset><AbsDimension x="0" y="-20"/></Offset></Anchor></Anchors>
+                                </FontString>
+
+                                <FontString name="Atr_ItemInfo_Auc_Text" inherits="GameFontHighlightSmall" text="">
+                                        <Anchors><Anchor point="TOPLEFT" relativeTo="Atr_ItemInfo_Total_Text"><Offset><AbsDimension x="0" y="-15"/></Offset></Anchor></Anchors>
+                                </FontString>
+
+                                <FontString name="Atr_ItemInfo_Median_Text" inherits="GameFontHighlightSmall" text="">
+                                        <Anchors><Anchor point="TOPLEFT" relativeTo="Atr_ItemInfo_Auc_Text"><Offset><AbsDimension x="0" y="-15"/></Offset></Anchor></Anchors>
+                                </FontString>
+
+                                <FontString name="Atr_ItemInfo_P5_Text" inherits="GameFontHighlightSmall" text="">
+                                        <Anchors><Anchor point="TOPLEFT" relativeTo="Atr_ItemInfo_Total_Text"><Offset><AbsDimension x="160" y="0"/></Offset></Anchor></Anchors>
+                                </FontString>
+
+                <FontString name="Atr_ItemInfo_P10_Text" inherits="GameFontHighlightSmall" text="">
+                                        <Anchors><Anchor point="TOPLEFT" relativeTo="Atr_ItemInfo_P5_Text"><Offset><AbsDimension x="0" y="-15"/></Offset></Anchor></Anchors>
+                                </FontString>
+
+                                <FontString name="Atr_ItemInfo_P25_Text" inherits="GameFontHighlightSmall" text="">
+                                        <Anchors><Anchor point="TOPLEFT" relativeTo="Atr_ItemInfo_P10_Text"><Offset><AbsDimension x="0" y="-15"/></Offset></Anchor></Anchors>
+                                </FontString>
+                        </Layer>
+
+                </Layers>
 
 
 
@@ -831,13 +855,13 @@
                                         <OnLoad>Atr_BuildBrowseHeaders(self);</OnLoad>
                                 </Scripts>
                                 <Frames>
-                                        <Button name="Atr_Back_Button" text="Back" inherits="UIPanelButtonTemplate"  hidden="true">
-                                                <Size><AbsDimension x="70" y="18"/></Size>
-                                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="8" y="5"/></Offset></Anchor></Anchors>
+                                        <Button name="Atr_Back_Button" inherits="UIPanelButtonTemplate"  hidden="true">
+                                                <Size><AbsDimension x="31" y="31"/></Size>
+                                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="22" y="34"/></Offset></Anchor></Anchors>
                                                 <Scripts><OnClick>Atr_Onclick_Back()</OnClick></Scripts>
-                                                <NormalFont style="GameFontNormalSmall"/>
-                                                <HighlightFont style="GameFontHighlightSmall"/>
-                                                <DisabledFont style="GameFontDisableSmall"/>
+                                                <NormalTexture file="Interface\Buttons\UI-SpellbookIcon-PrevPage-Up"/>
+                                                <PushedTexture file="Interface\Buttons\UI-SpellbookIcon-PrevPage-Down"/>
+                                                <HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
                                         </Button>
                                 </Frames>
                         </Frame>

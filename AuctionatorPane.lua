@@ -36,41 +36,56 @@ end
 -- Initiates a search with specified text and optional callback.
 function AtrPane:DoSearch (searchText, exact, rescanThreshold, callback)
 
-	self.currIndex			= nil;
-	self.histIndex			= nil;
-	self.hintsIndex			= nil;
-	
-	self.sortedHist			= nil;
-	self.hints				= nil;
-	
-	self.SS_hilite_itemName	= searchText;		-- by name for search summary
-	
-	Atr_ClearBuyState();
+        self.currIndex                  = nil;
+        self.histIndex                  = nil;
+        self.hintsIndex                 = nil;
 
-	self.activeScan = Atr_FindScan (nil);
-	
-	Atr_ClearAll();		-- it's fast, might as well just do it now for cleaner UE
-	
-	self.UINeedsUpdate = false;		-- will be set when scan finishes
-			
-	self.activeSearch = Atr_NewSearch (searchText, exact, rescanThreshold, callback);
-	
-	if (exact) then
-		self.activeScan = self.activeSearch:GetFirstScan();
-	end
-	
-	local cacheHit = false;
-	
-	if (searchText ~= "") then
-		if (self.activeScan.whenScanned == 0) then		-- check whenScanned so we don't rescan cache hits
-			self.activeSearch:Start();
-		else
-			self.UINeedsUpdate = true;
-			cacheHit = true;
-		end
-	end
-	
-	return cacheHit;
+        self.sortedHist                 = nil;
+        self.hints                              = nil;
+
+        self.SS_hilite_itemName = searchText;           -- by name for search summary
+
+        Atr_ClearBuyState();
+
+        self.activeScan = Atr_FindScan (nil);
+        self.activeScan.whenScanned = 0;                -- force fresh scans for partial searches
+        self.searchSummary = nil;
+
+        Atr_ClearAll();         -- it's fast, might as well just do it now for cleaner UE
+
+        self.UINeedsUpdate = false;             -- will be set when scan finishes
+
+        browseSortCol = "PerItem";      -- reset sort state for new searches
+        browseSortAsc = true;
+        Atr_UpdateBrowseArrows();
+
+        self.activeSearch = Atr_NewSearch (searchText, exact, rescanThreshold, callback);
+
+        if (exact) then
+                self.activeScan = self.activeSearch:GetFirstScan();
+        end
+
+        local cacheHit = false;
+
+        if (searchText ~= "") then
+                if (exact and self.activeScan.whenScanned ~= 0) then
+                        self.UINeedsUpdate = true;
+                        cacheHit = true;
+
+                        if (self.activeScan.sortedData) then
+                                table.sort(self.activeScan.sortedData, Atr_SortAuctionData);
+                        end
+
+                        browseSortCol = "PerItem";
+                        browseSortAsc = true;
+                        Atr_UpdateBrowseArrows();
+                else
+                        self.activeSearch:Start();
+                end
+        end
+
+        Atr_UpdateItemInfo();
+        return cacheHit;
 end
 
 -----------------------------------------
