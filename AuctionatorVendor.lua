@@ -1,3 +1,4 @@
+-- AuctionatorVendor.lua - part of Auctionator addon
 local addonName, addonTable = ...; 
 local zc = addonTable.zc;
 
@@ -9,6 +10,7 @@ local gAtr_MI = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 
 -----------------------------------------
 
+-- Extracts bonding information for an item from vendor data.
 function Atr_GetBonding (itemID, vpstr)
 
 	if (itemID == nil) then
@@ -41,6 +43,7 @@ end
 
 -----------------------------------------
 
+-- Returns the required level for disenchanting the item.
 function Atr_DEReqLevel (itemID, vpstr)
 
 	if (itemID == nil) then

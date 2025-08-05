@@ -1,3 +1,4 @@
+-- AuctionatorConflicts.lua - part of Auctionator addon
 
 local addonName, addonTable = ...; 
 local zc = addonTable.zc;
@@ -10,6 +11,7 @@ local Atr_orig_WOWEcon_Scan_AH;
 -----------------------------------------
 
 
+-- Wraps RecipeKnown event scanning to avoid Auctionator conflicts.
 local function Atr_RecipeKnown_EventScan (rkSelf, rkEvent, rkArg1)
 
 	if (event == "AUCTION_ITEM_LIST_UPDATE") then
@@ -29,6 +31,7 @@ end
 
 -----------------------------------------
 
+-- Wraps LootLink event handling to prevent conflicting scans.
 local function Atr_LootLink_OnEvent ()
 
 	if (event == "AUCTION_ITEM_LIST_UPDATE") then
@@ -48,6 +51,7 @@ end
 
 -----------------------------------------
 
+-- Wraps WowEcon scanning to avoid running during Auctionator operations.
 local function Atr_WOWEcon_Scan_AH ()
 
 	if (Atr_IsTabSelected()) then
@@ -65,6 +69,7 @@ end
 
 -----------------------------------------
 
+-- Hooks into other addons to prevent known Auctionator conflicts.
 function Atr_Check_For_Conflicts (addonName)
 
 	if (zc.StringSame (addonName, "recipeknown") and RecipeKnown_EventScan) then

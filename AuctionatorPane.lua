@@ -1,3 +1,4 @@
+-- AuctionatorPane.lua - part of Auctionator addon
 AtrPane = {};
 AtrPane.__index = AtrPane;
 
@@ -5,6 +6,7 @@ ATR_SHOW_CURRENT	= 1;
 ATR_SHOW_HISTORY	= 2;
 ATR_SHOW_HINTS		= 3;
 
+-- Creates a new search pane instance.
 function AtrPane.create ()
 
 	local pane = {};
@@ -31,6 +33,7 @@ end
 
 -----------------------------------------
 
+-- Initiates a search with specified text and optional callback.
 function AtrPane:DoSearch (searchText, exact, rescanThreshold, callback)
 
 	self.currIndex			= nil;
@@ -72,12 +75,14 @@ end
 
 -----------------------------------------
 
+-- Clears previous search results and resets the pane.
 function AtrPane:ClearSearch ()
 	self:DoSearch ("", true);
 end
 
 -----------------------------------------
 
+-- Returns current processing state for the pane.
 function AtrPane:GetProcessingState ()
 	
 	if (self.activeSearch) then
@@ -89,6 +94,7 @@ end
 
 -----------------------------------------
 
+-- Checks if there are any results in the active scan.
 function AtrPane:IsScanEmpty ()
 	
 	return (self.activeScan == nil or self.activeScan:IsNil());
@@ -97,6 +103,7 @@ end
 
 -----------------------------------------
 
+-- Displays the list of current auctions for the search.
 function AtrPane:ShowCurrent ()
 	
 	return self.showWhich == ATR_SHOW_CURRENT;
@@ -105,6 +112,7 @@ end
 
 -----------------------------------------
 
+-- Displays stored price history for the item.
 function AtrPane:ShowHistory ()
 	
 	return self.showWhich == ATR_SHOW_HISTORY;
@@ -113,6 +121,7 @@ end
 
 -----------------------------------------
 
+-- Displays search hint entries.
 function AtrPane:ShowHints ()
 	
 	return self.showWhich == ATR_SHOW_HINTS;
@@ -121,6 +130,7 @@ end
 
 -----------------------------------------
 
+-- Sets pane state to show current auctions.
 function AtrPane:SetToShowCurrent ()
 	
 	self.showWhich = ATR_SHOW_CURRENT;
@@ -129,6 +139,7 @@ end
 
 -----------------------------------------
 
+-- Sets pane state to show historical data.
 function AtrPane:SetToShowHistory ()
 	
 	self.showWhich = ATR_SHOW_HISTORY;
@@ -142,6 +153,7 @@ end
 
 -----------------------------------------
 
+-- Sets pane state to show hint suggestions.
 function AtrPane:SetToShowHints ()
 	
 	self.showWhich = ATR_SHOW_HINTS;

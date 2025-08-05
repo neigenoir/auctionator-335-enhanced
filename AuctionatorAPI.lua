@@ -1,3 +1,4 @@
+-- AuctionatorAPI.lua - part of Auctionator addon
 
 
 -----------------------------------------
@@ -7,6 +8,7 @@ local origGetAuctionBuyout	= GetAuctionBuyout;
 
 -----------------------------------------
 
+-- Returns vendor sell price for item using Auctionator override.
 function GetSellValue (item)		-- Tekkub's API
 	
 	return Atr_GetSellValue(item);
@@ -14,6 +16,7 @@ end
 
 -----------------------------------------
 
+-- Returns AH buyout price using Auctionator data if available.
 function GetAuctionBuyout (item)		-- Tekkub's API
 	
 	return Atr_GetAuctionBuyout(item);
@@ -21,6 +24,7 @@ end
 
 -----------------------------------------
 
+-- Internal helper that ensures Auctionator sells value lookup.
 function Atr_GetSellValue (item)		-- Just like Tekkub's API but for when you want to be sure you're calling Auctionator's version of it
 
 	local sellval = select (11, GetItemInfo(item));
@@ -39,6 +43,7 @@ end
 
 -----------------------------------------
 
+-- Internal helper that ensures Auctionator buyout price lookup.
 function Atr_GetAuctionBuyout (item)  -- Just like Tekkub's API but for when you want to be sure you're calling Auctionator's version of it
 
 	local sellval;
@@ -67,6 +72,7 @@ end
 
 -----------------------------------------
 
+-- Calculates disenchant value for item using Auctionator data.
 function Atr_GetDisenchantValue (item)
 
 	local itemName, itemLink, itemRarity, itemLevel, _, itemType = GetItemInfo (item);
