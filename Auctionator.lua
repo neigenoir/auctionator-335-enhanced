@@ -1883,6 +1883,7 @@ function Atr_ClearCurrent()
 
         if (Atr_ItemInfo_Total_Text) then
                 Atr_ItemInfo_Total_Text:SetText("");
+                if Atr_ItemInfo_Auc_Text then Atr_ItemInfo_Auc_Text:SetText(""); end
                 Atr_ItemInfo_Median_Text:SetText("");
                 Atr_ItemInfo_P5_Text:SetText("");
                 Atr_ItemInfo_P10_Text:SetText("");
@@ -2209,29 +2210,72 @@ end
 
 local function Atr_GetPricePercentile(scan, pct)
         if not scan then return nil end
-        local total = scan:GetNumAvailable();
-        if total == 0 then return nil end
-        local target = math.ceil(total * pct / 100);
-        local count = 0;
+        local total = 0
         for i = 1, #scan.sortedData do
-                local data = scan.sortedData[i];
-                count = count + data.count * data.stackSize;
-                if count >= target then
-                        return data.itemPrice;
+                local data = scan.sortedData[i]
+                if data.itemPrice > 0 then
+                        total = total + data.count * data.stackSize
                 end
         end
-        return nil;
+        if total == 0 then return nil end
+        local target = math.ceil(total * pct / 100)
+        local count = 0
+        for i = 1, #scan.sortedData do
+                local data = scan.sortedData[i]
+                if data.itemPrice > 0 then
+                        count = count + data.count * data.stackSize
+                        if count >= target then
+                                return data.itemPrice
+                        end
+                end
+        end
+        return nil
+end
+
+function Atr_UpdateItemInfo()
+        local scan = gCurrentPane and gCurrentPane.activeScan
+        if not scan or not Atr_ItemInfo_Total_Text then return end
+
+        local totalAuctions = 0
+        for i = 1, #scan.sortedData do
+                totalAuctions = totalAuctions + scan.sortedData[i].count
+        end
+
+        local totalItems = scan:GetNumAvailable()
+        local median = Atr_GetPricePercentile(scan, 50)
+        local p5 = Atr_GetPricePercentile(scan, 5)
+        local p10 = Atr_GetPricePercentile(scan, 10)
+        local p25 = Atr_GetPricePercentile(scan, 25)
+
+        local function lbl(t)
+                return string.format("%-5s", t)
+        end
+
+        Atr_ItemInfo_Total_Text:SetText(string.format("всего %d предметов", totalItems))
+        if Atr_ItemInfo_Auc_Text then
+                Atr_ItemInfo_Auc_Text:SetText(string.format("всего %d аукционов", totalAuctions))
+        end
+        Atr_ItemInfo_Median_Text:SetText(lbl("m:")..(median and zc.priceToMoneyString(median) or "—"))
+        Atr_ItemInfo_P5_Text:SetText(lbl("p5:")..(p5 and zc.priceToMoneyString(p5) or "—"))
+        Atr_ItemInfo_P10_Text:SetText(lbl("p10:")..(p10 and zc.priceToMoneyString(p10) or "—"))
+        Atr_ItemInfo_P25_Text:SetText(lbl("p25:")..(p25 and zc.priceToMoneyString(p25) or "—"))
 end
 
 -----------------------------------------
 
 function Atr_UpdateRecommendation (updatePrices)
 
-	if (gCurrentPane == gSellPane and gJustPosted_ItemLink and GetAuctionSellItemInfo() == nil) then
-		return;
-	end
+        if (gCurrentPane == gSellPane and gJustPosted_ItemLink and GetAuctionSellItemInfo() == nil) then
+                return;
+        end
 
-	local basedata;
+        local scn = gCurrentPane.activeScan;
+        if (not scn) then
+                return;
+        end
+        Atr_UpdateItemInfo();
+
+        local basedata;
 
 	if (Atr_ShowingSearchSummary()) then
 	
@@ -2311,10 +2355,6 @@ function Atr_UpdateRecommendation (updatePrices)
         AuctionatorMessageFrame:Hide();
         AuctionatorMessage2Frame:Hide();
 
-        local scn = gCurrentPane.activeScan;
-        if (not scn) then
-                return;
-        end
         local color = "";
         if (not scn:IsNil()) then
                 color = "|cff"..zc.RGBtoHEX (scn.itemTextColor[1], scn.itemTextColor[2], scn.itemTextColor[3]);
@@ -2333,25 +2373,6 @@ function Atr_UpdateRecommendation (updatePrices)
                 MoneyInputFrame_SetCopper (Atr_StackPrice,              new_Item_BuyoutPrice * Atr_StackSize());
                 MoneyInputFrame_SetCopper (Atr_StartingPrice,   new_Item_StartPrice * Atr_StackSize());
                 MoneyInputFrame_SetCopper (Atr_ItemPrice,               new_Item_BuyoutPrice);
-        end
-
-        local totalAuctions = 0;
-        for i = 1, #scn.sortedData do
-                totalAuctions = totalAuctions + scn.sortedData[i].count;
-        end
-
-        local totalItems = scn:GetNumAvailable();
-        local median = Atr_GetPricePercentile(scn, 50);
-        local p5 = Atr_GetPricePercentile(scn, 5);
-        local p10 = Atr_GetPricePercentile(scn, 10);
-        local p25 = Atr_GetPricePercentile(scn, 25);
-
-        if Atr_ItemInfo_Total_Text then
-                Atr_ItemInfo_Total_Text:SetText(string.format("всего %d штук на %d аукционах", totalItems, totalAuctions));
-                Atr_ItemInfo_Median_Text:SetText("медианная цена за штуку: "..(median and zc.priceToMoneyString(median) or "—"));
-                Atr_ItemInfo_P5_Text:SetText("процентиль 5 цены за штуку: "..(p5 and zc.priceToMoneyString(p5) or "—"));
-                Atr_ItemInfo_P10_Text:SetText("процентиль 10 цены за штуку: "..(p10 and zc.priceToMoneyString(p10) or "—"));
-                Atr_ItemInfo_P25_Text:SetText("процентиль 25 цены за штуку: "..(p25 and zc.priceToMoneyString(p25) or "—"));
         end
 
         Atr_UpdateCacheAgeDisplay();
