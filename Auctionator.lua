@@ -92,6 +92,23 @@ function Atr_BuildBrowseHeaders(parent)
 end
 
 function Atr_BuildBrowseEntry(row)
+  -- Item name column used by search summary and history lists
+  local entry = CreateFrame("Frame", row:GetName() .. "_Entry", row)
+  entry:SetSize(150, 16)
+  entry:SetPoint("LEFT", row, "LEFT", 0, 0)
+
+  local entryText = entry:CreateFontString(row:GetName() .. "_EntryText", "BACKGROUND", "GameFontHighlightSmall")
+  entryText:SetPoint("LEFT", entry, "LEFT", 0, 1)
+  entryText:SetWidth(150)
+  entryText:SetJustifyH("LEFT")
+  entryText:SetWordWrap(false)
+
+  local stack = entry:CreateFontString(row:GetName() .. "_StackPrice", "BACKGROUND", "GameFontHighlightSmall")
+  stack:SetPoint("LEFT", entry, "RIGHT", 4, 1)
+  stack:SetWidth(120)
+  stack:SetJustifyH("LEFT")
+  stack:SetWordWrap(false)
+
   local prev
   for _, col in ipairs(BROWSE_COLUMNS) do
     local frame = CreateFrame("Frame", row:GetName() .. "_" .. col.name, row)
