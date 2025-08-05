@@ -22,8 +22,8 @@ BROWSE_COLUMNS = {
   {name = "Owner",      width = 80,  heading = "Seller"},
 }
 
-local browseSortCol = "PerItem"
-local browseSortAsc = true
+browseSortCol = "PerItem"
+browseSortAsc = true
 
 local gSellPriceCache = {}
 
