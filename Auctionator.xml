@@ -264,7 +264,7 @@
 					</Font>
 				</FontString>
 
-				<FontString name="Atr_Recommend_Text" inherits="GameFontNormal" text="Recommended buyout price">
+                                <FontString name="Atr_Recommend_Text" inherits="GameFontNormal" text="">
 					<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="77" y="-98"/></Offset></Anchor></Anchors>
 				</FontString>
 
@@ -280,15 +280,39 @@
 					<Anchors><Anchor point="TOPLEFT" relativeTo="Atr_Recommend_Text"><Offset><AbsDimension x="152" y="-51"/></Offset></Anchor></Anchors>
 				</FontString>
 
-				<FontString name="Atr_CacheAge_Text" inherits="GameFontHighlightSmall" text="">
-					<Anchors><Anchor point="TOPLEFT" relativeTo="Atr_Recommend_Text"><Offset><AbsDimension x="0" y="-20"/></Offset></Anchor></Anchors>
-					<Font>
-						<Color r="0.7" g="0.7" b="0.7"/>
-					</Font>
-				</FontString>
-			</Layer>
+                                <FontString name="Atr_CacheAge_Text" inherits="GameFontHighlightSmall" text="">
+                                        <Anchors><Anchor point="TOPLEFT" relativeTo="Atr_Recommend_Text"><Offset><AbsDimension x="0" y="-20"/></Offset></Anchor></Anchors>
+                                        <Font>
+                                                <Color r="0.7" g="0.7" b="0.7"/>
+                                        </Font>
+                                </FontString>
 
-		</Layers>
+                                <FontString name="Atr_ItemInfo_Total_Text" inherits="GameFontHighlightSmall" text="">
+                                        <Anchors><Anchor point="TOPLEFT" relativeTo="Atr_CacheAge_Text"><Offset><AbsDimension x="0" y="-15"/></Offset></Anchor></Anchors>
+                                </FontString>
+
+                                <FontString name="Atr_ItemInfo_Auc_Text" inherits="GameFontHighlightSmall" text="">
+                                        <Anchors><Anchor point="TOPLEFT" relativeTo="Atr_ItemInfo_Total_Text"><Offset><AbsDimension x="0" y="-15"/></Offset></Anchor></Anchors>
+                                </FontString>
+
+                                <FontString name="Atr_ItemInfo_Median_Text" inherits="GameFontHighlightSmall" text="">
+                                        <Anchors><Anchor point="TOPLEFT" relativeTo="Atr_ItemInfo_Total_Text"><Offset><AbsDimension x="160" y="0"/></Offset></Anchor></Anchors>
+                                </FontString>
+
+                                <FontString name="Atr_ItemInfo_P5_Text" inherits="GameFontHighlightSmall" text="">
+                                        <Anchors><Anchor point="TOPLEFT" relativeTo="Atr_ItemInfo_Median_Text"><Offset><AbsDimension x="0" y="-15"/></Offset></Anchor></Anchors>
+                                </FontString>
+
+                <FontString name="Atr_ItemInfo_P10_Text" inherits="GameFontHighlightSmall" text="">
+                                        <Anchors><Anchor point="TOPLEFT" relativeTo="Atr_ItemInfo_P5_Text"><Offset><AbsDimension x="0" y="-15"/></Offset></Anchor></Anchors>
+                                </FontString>
+
+                                <FontString name="Atr_ItemInfo_P25_Text" inherits="GameFontHighlightSmall" text="">
+                                        <Anchors><Anchor point="TOPLEFT" relativeTo="Atr_ItemInfo_P10_Text"><Offset><AbsDimension x="0" y="-15"/></Offset></Anchor></Anchors>
+                                </FontString>
+                        </Layer>
+
+                </Layers>
 
 
 
