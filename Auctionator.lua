@@ -22,8 +22,10 @@ BROWSE_COLUMNS = {
   {name = "Owner",      width = 80,  heading = "Seller"},
 }
 
-local browseSortCol = "PerItem"
-local browseSortAsc = true
+browseSortCol = "PerItem"
+browseSortAsc = true
+
+local gSellPriceCache = {}
 
 local BROWSE_SORT_FUNCS = {
   CurrentBid = function(a) return a.nextBidPerItem or 0 end,
@@ -90,6 +92,23 @@ function Atr_BuildBrowseHeaders(parent)
 end
 
 function Atr_BuildBrowseEntry(row)
+  -- Item name column used by search summary and history lists
+  local entry = CreateFrame("Frame", row:GetName() .. "_Entry", row)
+  entry:SetSize(150, 16)
+  entry:SetPoint("LEFT", row, "LEFT", 0, 0)
+
+  local entryText = entry:CreateFontString(row:GetName() .. "_EntryText", "BACKGROUND", "GameFontHighlightSmall")
+  entryText:SetPoint("LEFT", entry, "LEFT", 0, 1)
+  entryText:SetWidth(150)
+  entryText:SetJustifyH("LEFT")
+  entryText:SetWordWrap(false)
+
+  local stack = entry:CreateFontString(row:GetName() .. "_StackPrice", "BACKGROUND", "GameFontHighlightSmall")
+  stack:SetPoint("LEFT", entry, "RIGHT", 4, 1)
+  stack:SetWidth(120)
+  stack:SetJustifyH("LEFT")
+  stack:SetWordWrap(false)
+
   local prev
   for _, col in ipairs(BROWSE_COLUMNS) do
     local frame = CreateFrame("Frame", row:GetName() .. "_" .. col.name, row)
@@ -821,9 +840,15 @@ function Atr_Init()
 	recommendElements[2] = getglobal ("Atr_RecommendPerItem_Text");
 	recommendElements[3] = getglobal ("Atr_RecommendPerItem_Price");
 	recommendElements[4] = getglobal ("Atr_RecommendPerStack_Text");
-	recommendElements[5] = getglobal ("Atr_RecommendPerStack_Price");
-	recommendElements[6] = getglobal ("Atr_Recommend_Basis_Text");
-	recommendElements[7] = getglobal ("Atr_RecommendItem_Tex");
+        recommendElements[5] = getglobal ("Atr_RecommendPerStack_Price");
+        recommendElements[6] = getglobal ("Atr_Recommend_Basis_Text");
+        recommendElements[7] = getglobal ("Atr_RecommendItem_Tex");
+
+        Atr_RecommendPerItem_Text:Hide();
+        Atr_RecommendPerItem_Price:Hide();
+        Atr_RecommendPerStack_Text:Hide();
+        Atr_RecommendPerStack_Price:Hide();
+        Atr_Recommend_Basis_Text:Hide();
 	
 	-- Initialize cache age display as hidden
 	if (Atr_CacheAge_Text) then
@@ -1870,10 +1895,19 @@ function Atr_ClearCurrent()
 		gCurrentPane.activeScan = Atr_FindScan(nil);
 	end
 	
-	-- Clear the recommendation text
-	if (Atr_Recommend_Text) then
-		Atr_Recommend_Text:SetText("");
-	end
+        -- Clear the recommendation text
+        if (Atr_Recommend_Text) then
+                Atr_Recommend_Text:SetText("");
+        end
+
+        if (Atr_ItemInfo_Total_Text) then
+                Atr_ItemInfo_Total_Text:SetText("");
+                if Atr_ItemInfo_Auc_Text then Atr_ItemInfo_Auc_Text:SetText(""); end
+                Atr_ItemInfo_Median_Text:SetText("");
+                Atr_ItemInfo_P5_Text:SetText("");
+                Atr_ItemInfo_P10_Text:SetText("");
+                Atr_ItemInfo_P25_Text:SetText("");
+        end
 	
 	-- Clear any current message
 	Atr_SetMessage("");
@@ -2190,15 +2224,92 @@ end
 
 
 
+
+-----------------------------------------
+
+local function Atr_GetPricePercentile(scan, pct)
+        if not scan then return nil end
+        local total = 0
+        for i = 1, #scan.sortedData do
+                local data = scan.sortedData[i]
+                if data.itemPrice > 0 then
+                        total = total + data.count * data.stackSize
+                end
+        end
+        if total == 0 then return nil end
+        local target = math.ceil(total * pct / 100)
+        local count = 0
+        for i = 1, #scan.sortedData do
+                local data = scan.sortedData[i]
+                if data.itemPrice > 0 then
+                        count = count + data.count * data.stackSize
+                        if count >= target then
+                                return data.itemPrice
+                        end
+                end
+        end
+        return nil
+end
+
+function Atr_UpdateItemInfo()
+        local pane = gCurrentPane
+        local scan = pane and pane.activeScan
+        if not scan or not Atr_ItemInfo_Total_Text then return end
+
+        local function clear()
+                Atr_ItemInfo_Total_Text:SetText("")
+                if Atr_ItemInfo_Auc_Text then Atr_ItemInfo_Auc_Text:SetText("") end
+                Atr_ItemInfo_Median_Text:SetText("")
+                Atr_ItemInfo_P5_Text:SetText("")
+                Atr_ItemInfo_P10_Text:SetText("")
+                Atr_ItemInfo_P25_Text:SetText("")
+        end
+
+        if pane:GetProcessingState() ~= KM_NULL_STATE or #scan.sortedData == 0 then
+                clear()
+                return
+        end
+
+        local totalAuctions = 0
+        for i = 1, #scan.sortedData do
+                totalAuctions = totalAuctions + scan.sortedData[i].count
+        end
+
+        local totalItems = scan:GetNumAvailable()
+        local median = Atr_GetPricePercentile(scan, 50)
+        local p05 = Atr_GetPricePercentile(scan, 5)
+        local p10 = Atr_GetPricePercentile(scan, 10)
+        local p25 = Atr_GetPricePercentile(scan, 25)
+
+        local function lbl(t)
+                return string.format("%-5s", t)
+        end
+
+        Atr_ItemInfo_Total_Text:SetText(string.format("всего %d предметов", totalItems))
+        if Atr_ItemInfo_Auc_Text then
+                Atr_ItemInfo_Auc_Text:SetText(string.format("всего %d аукционов", totalAuctions))
+        end
+        Atr_ItemInfo_Median_Text:SetText(lbl("m:")..(median and zc.priceToMoneyString(median) or "—"))
+        Atr_ItemInfo_P5_Text:SetText(lbl("p05:")..(p05 and zc.priceToMoneyString(p05) or "—"))
+        Atr_ItemInfo_P10_Text:SetText(lbl("p10:")..(p10 and zc.priceToMoneyString(p10) or "—"))
+        Atr_ItemInfo_P25_Text:SetText(lbl("p25:")..(p25 and zc.priceToMoneyString(p25) or "—"))
+end
+
 -----------------------------------------
 
 function Atr_UpdateRecommendation (updatePrices)
 
-	if (gCurrentPane == gSellPane and gJustPosted_ItemLink and GetAuctionSellItemInfo() == nil) then
-		return;
-	end
+        if (gCurrentPane == gSellPane and gJustPosted_ItemLink and GetAuctionSellItemInfo() == nil) then
+                return;
+        end
 
-	local basedata;
+        local scn = gCurrentPane.activeScan;
+        if (not scn) then
+                return;
+        end
+        Atr_UpdateItemInfo();
+
+        local basedata;
 
 	if (Atr_ShowingSearchSummary()) then
 	
@@ -2274,38 +2385,32 @@ function Atr_UpdateRecommendation (updatePrices)
 	
 	local new_Item_StartPrice = Atr_CalcStartPrice (new_Item_BuyoutPrice);
 
-	--Atr_ShowElems (recommendElements);
-	AuctionatorMessageFrame:Hide();
-	AuctionatorMessage2Frame:Hide();
+        --Atr_ShowElems (recommendElements);
+        AuctionatorMessageFrame:Hide();
+        AuctionatorMessage2Frame:Hide();
 
-	Atr_Recommend_Text:SetText (ZT("Recommended Buyout Price"));
-	Atr_RecommendPerStack_Text:SetText (string.format (ZT("for your stack of %d"), Atr_StackSize()));
+        local color = "";
+        if (not scn:IsNil()) then
+                color = "|cff"..zc.RGBtoHEX (scn.itemTextColor[1], scn.itemTextColor[2], scn.itemTextColor[3]);
+        end
+        Atr_Recommend_Text:SetText (color..scn.itemName);
 
-	Atr_SetTextureButton ("Atr_RecommendItem_Tex", Atr_StackSize(), gCurrentPane.activeScan.itemLink);
+        Atr_SetTextureButton ("Atr_RecommendItem_Tex", Atr_StackSize(), scn.itemLink);
 
-	MoneyFrame_Update ("Atr_RecommendPerItem_Price",  zc.round(new_Item_BuyoutPrice));
-	MoneyFrame_Update ("Atr_RecommendPerStack_Price", zc.round(new_Item_BuyoutPrice * Atr_StackSize()));
+        Atr_RecommendPerStack_Text:Hide();
+        Atr_RecommendPerItem_Text:Hide();
+        Atr_RecommendPerStack_Price:Hide();
+        Atr_RecommendPerItem_Price:Hide();
+        Atr_Recommend_Basis_Text:Hide();
 
-	if (updatePrices) then
-		MoneyInputFrame_SetCopper (Atr_StackPrice,		new_Item_BuyoutPrice * Atr_StackSize());
-		MoneyInputFrame_SetCopper (Atr_StartingPrice, 	new_Item_StartPrice * Atr_StackSize());
-		MoneyInputFrame_SetCopper (Atr_ItemPrice,		new_Item_BuyoutPrice);
-	end
-	
-	local cheapestStack = gCurrentPane.activeScan.bestPrices[Atr_StackSize()];
+        if (updatePrices) then
+                MoneyInputFrame_SetCopper (Atr_StackPrice,              new_Item_BuyoutPrice * Atr_StackSize());
+                MoneyInputFrame_SetCopper (Atr_StartingPrice,   new_Item_StartPrice * Atr_StackSize());
+                MoneyInputFrame_SetCopper (Atr_ItemPrice,               new_Item_BuyoutPrice);
+        end
 
-	Atr_Recommend_Basis_Text:SetTextColor (1,1,1);
+        Atr_UpdateCacheAgeDisplay();
 
-	if (Atr_ShowingHints()) then
-		Atr_Recommend_Basis_Text:SetTextColor (.8,.8,1);
-		Atr_Recommend_Basis_Text:SetText ("("..ZT("based on").." "..basedata.sourceText..")");
-	elseif (gCurrentPane.activeScan.absoluteBest and basedata.stackSize == gCurrentPane.activeScan.absoluteBest.stackSize and basedata.buyoutPrice == gCurrentPane.activeScan.absoluteBest.buyoutPrice) then
-		Atr_Recommend_Basis_Text:SetText ("("..ZT("based on cheapest current auction")..")");
-	elseif (cheapestStack and basedata.stackSize == cheapestStack.stackSize and basedata.buyoutPrice == cheapestStack.buyoutPrice) then
-		Atr_Recommend_Basis_Text:SetText ("("..ZT("based on cheapest stack of the same size")..")");
-	else
-		Atr_Recommend_Basis_Text:SetText ("("..ZT("based on selected auction")..")");
-	end
 
 end
 
@@ -2655,45 +2760,59 @@ function Atr_OnNewAuctionUpdate()
 
 	if (gPrevSellItemLink ~= auctionLink) then
 
-		gPrevSellItemLink = auctionLink;
-		
-		if (auctionLink) then
-			gJustPosted_ItemName = nil;
-			Atr_AddToItemLinkCache (auctionItemName, auctionLink);
-			Atr_ClearList();		-- better UE
-			gSellPane:SetToShowCurrent();
-		end
-		
-		MoneyInputFrame_SetCopper (Atr_StackPrice, 0);
-		MoneyInputFrame_SetCopper (Atr_StartingPrice,  0);
-		Atr_ResetDuration();
-		
-		if (gJustPosted_ItemName == nil) then
-			local cacheHit = gSellPane:DoSearch (auctionItemName, true, AUCTIONATOR_CACHE_THRESHOLD);
-			
-			gSellPane.totalItems	= Atr_GetNumItemInBags (auctionItemName);
-			gSellPane.fullStackSize = auctionLink and (select (8, GetItemInfo (auctionLink))) or 0;
+                if (gPrevSellItemLink) then
+                        gSellPriceCache[gPrevSellItemLink] = {
+                                stack = MoneyInputFrame_GetCopper(Atr_StackPrice),
+                                start = MoneyInputFrame_GetCopper(Atr_StartingPrice)
+                        };
+                end
 
-			local prefNumStacks, prefStackSize = Atr_GetSellStacking (auctionLink, auctionCount, gSellPane.totalItems);
-			
-			if (time() - gAutoSingleton < 5) then
-				Atr_SetInitialStacking (1, 1);
-			else
-				Atr_SetInitialStacking (prefNumStacks, prefStackSize);
-			end
-			
-			if (cacheHit) then
-				Atr_OnSearchComplete ();
-			end
-			
-			Atr_SetTextureButton ("Atr_SellControls_Tex", Atr_StackSize(), auctionLink);
-			Atr_SellControls_TexName:SetText (auctionItemName);
-		else
-			Atr_SetTextureButton ("Atr_SellControls_Tex", 0, nil);
-			Atr_SellControls_TexName:SetText ("");
-		end
-		
-	elseif (Atr_StackSize() ~= auctionCount) then
+                gPrevSellItemLink = auctionLink;
+
+                if (auctionLink) then
+                        gJustPosted_ItemName = nil;
+                        Atr_AddToItemLinkCache (auctionItemName, auctionLink);
+                        Atr_ClearList();                -- better UE
+                        gSellPane:SetToShowCurrent();
+                end
+
+                local cacheHit = false;
+
+                if (gJustPosted_ItemName == nil) then
+                        cacheHit = gSellPane:DoSearch (auctionItemName, true, AUCTIONATOR_CACHE_THRESHOLD);
+
+                        gSellPane.totalItems    = Atr_GetNumItemInBags (auctionItemName);
+                        gSellPane.fullStackSize = auctionLink and (select (8, GetItemInfo (auctionLink))) or 0;
+
+                        local prefNumStacks, prefStackSize = Atr_GetSellStacking (auctionLink, auctionCount, gSellPane.totalItems);
+
+                        if (time() - gAutoSingleton < 5) then
+                                Atr_SetInitialStacking (1, 1);
+                        else
+                                Atr_SetInitialStacking (prefNumStacks, prefStackSize);
+                        end
+
+                        if (cacheHit) then
+                                local prev = gSellPriceCache[auctionLink];
+                                if (prev) then
+                                        MoneyInputFrame_SetCopper (Atr_StackPrice, prev.stack);
+                                        MoneyInputFrame_SetCopper (Atr_StartingPrice, prev.start);
+                                end
+                                Atr_OnSearchComplete ();
+                        else
+                                MoneyInputFrame_SetCopper (Atr_StackPrice, 0);
+                                MoneyInputFrame_SetCopper (Atr_StartingPrice, 0);
+                                Atr_ResetDuration();
+                        end
+
+                        Atr_SetTextureButton ("Atr_SellControls_Tex", Atr_StackSize(), auctionLink);
+                        Atr_SellControls_TexName:SetText (auctionItemName);
+                else
+                        Atr_SetTextureButton ("Atr_SellControls_Tex", 0, nil);
+                        Atr_SellControls_TexName:SetText ("");
+                end
+
+        elseif (Atr_StackSize() ~= auctionCount) then
 	
 		local prefNumStacks, prefStackSize = Atr_GetSellStacking (auctionLink, auctionCount, gSellPane.totalItems);
 
@@ -3542,8 +3661,16 @@ end
 
 function Atr_Onclick_Back ()
 
-	gCurrentPane.activeScan = Atr_FindScan (nil);
-	gCurrentPane.UINeedsUpdate = true;
+        if gCurrentPane.searchSummary then
+                Atr_Search_Box:SetText(gCurrentPane.searchSummary.origSearchText or "")
+                gCurrentPane.activeSearch = gCurrentPane.searchSummary
+                gCurrentPane.searchSummary = nil
+                gCurrentPane.activeScan = Atr_FindScan (nil)
+        else
+                gCurrentPane.activeScan = Atr_FindScan (nil)
+        end
+        gCurrentPane.UINeedsUpdate = true;
+        Atr_UpdateItemInfo();
 
 end
 
@@ -3646,29 +3773,34 @@ function Atr_ShowSearchSummary()
 			local lineEntry_text		= getglobal("AuctionatorEntry"..line.."_EntryText");
 			local lineEntry_stack		= getglobal("AuctionatorEntry"..line.."_StackPrice");
 
-			lineEntry_itemtext:SetText	("");
-			lineEntry_text:SetText	("");
-			lineEntry_stack:SetText	("");
+                        lineEntry_itemtext:SetText      ("");
+                        lineEntry_text:SetText  ("");
+                        lineEntry_stack:SetText ("");
 
-			lineEntry_text:GetParent():SetPoint ("LEFT", 157, 0);
-			
-			Atr_SetMFcolor (lineEntry_item_tag);
-			
-			lineEntry:Show();
+                        local entryFrame = lineEntry_text:GetParent();
+                        entryFrame:ClearAllPoints();
+                        entryFrame:SetPoint("LEFT", lineEntry, "LEFT", 0, 0);
+                        entryFrame:SetWidth(420);
+                        lineEntry_stack:Hide();
+                        local priceFrame = lineEntry_item:GetParent();
+                        priceFrame:ClearAllPoints();
+                        priceFrame:SetPoint("RIGHT", lineEntry, "RIGHT", 0, 0);
 
-			lineEntry.itemLink = scn.itemLink;
+                        Atr_SetMFcolor (lineEntry_item_tag);
+
+                        lineEntry:Show();
+
+                        lineEntry.itemLink = scn.itemLink;
 			
 			local r = scn.itemTextColor[1];
 			local g = scn.itemTextColor[2];
 			local b = scn.itemTextColor[3];
 			
-			lineEntry_text:SetTextColor (r, g, b);
-			lineEntry_stack:SetTextColor (1, 1, 1);
-			
-			local icon = Atr_GetUCIcon (scn.itemName);
-			
-			lineEntry_text:SetText (icon.."  "..scn.itemName);
-			lineEntry_stack:SetText (scn:GetNumAvailable().." "..ZT("available"));
+                        lineEntry_text:SetTextColor (r, g, b);
+
+                        local icon = Atr_GetUCIcon (scn.itemName);
+
+                        lineEntry_text:SetText (icon.."  "..scn.itemName);
 			
 			if (data == nil or data.buyoutPrice == 0) then
 				lineEntry_item:Hide();
@@ -3733,13 +3865,21 @@ function Atr_ShowCurrentAuctions()
 
 			local lineEntry_item_tag = "AuctionatorEntry"..line.."_PerItem_Price";
 
-			local lineEntry_item		= getglobal(lineEntry_item_tag);
-			local lineEntry_itemtext	= getglobal("AuctionatorEntry"..line.."_PerItem_Text");
-			local lineEntry_bid			= getglobal("AuctionatorEntry"..line.."_CurrentBid_Price");
+                        local lineEntry_item            = getglobal(lineEntry_item_tag);
+                        local lineEntry_itemtext        = getglobal("AuctionatorEntry"..line.."_PerItem_Text");
+                        local lineEntry_text            = getglobal("AuctionatorEntry"..line.."_EntryText");
+                        local lineEntry_stack           = getglobal("AuctionatorEntry"..line.."_StackPrice");
+                        local lineEntry_bid                     = getglobal("AuctionatorEntry"..line.."_CurrentBid_Price");
 
-			lineEntry_itemtext:SetText	("");
+                        local entryFrame = lineEntry_text:GetParent();
+                        entryFrame:ClearAllPoints();
+                        entryFrame:SetPoint("LEFT", lineEntry, "LEFT", 0, 0);
+                        entryFrame:SetWidth(150);
+                        lineEntry_stack:Show();
 
-			Atr_SetMFcolor (lineEntry_item_tag);
+                        lineEntry_itemtext:SetText      ("");
+
+                        Atr_SetMFcolor (lineEntry_item_tag);
 
 			if (data.type == "n") then
 
@@ -3970,18 +4110,18 @@ function Atr_EntryOnClick()
 	else												gCurrentPane.hintsIndex = entryIndex;
 	end
 
-	if (Atr_ShowingSearchSummary()) then
-		local scn = gCurrentPane.activeSearch.sortedScans[entryIndex];
-
-		FauxScrollFrame_SetOffset (AuctionatorScrollFrame, 0);
-		gCurrentPane.activeScan = scn;
-		gCurrentPane.currIndex = scn:FindMatchByYours ();
-		gCurrentPane.SS_hilite_itemName = scn.itemName;
-		gCurrentPane.UINeedsUpdate = true;
-	else
-		Atr_HighlightEntry (entryIndex);
-		Atr_UpdateRecommendation(true);
-	end
+       if (Atr_ShowingSearchSummary()) then
+               local scn = gCurrentPane.activeSearch.sortedScans[entryIndex]
+               if scn then
+                       local prevSearch = gCurrentPane.activeSearch
+                       Atr_Search_Box:SetText(scn.itemName)
+                       gCurrentPane:DoSearch(scn.itemName, true, AUCTIONATOR_CACHE_THRESHOLD)
+                       gCurrentPane.searchSummary = prevSearch
+               end
+       else
+               Atr_HighlightEntry (entryIndex);
+               Atr_UpdateRecommendation(true);
+       end
 
 	PlaySound ("igMainMenuOptionCheckBoxOn");
 end
