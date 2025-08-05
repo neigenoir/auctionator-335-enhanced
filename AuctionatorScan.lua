@@ -765,13 +765,13 @@ function AtrScan:CondenseAndSort ()
 			dataType = "a";
 		end
 
-		local key = "_".. sd.stackSize 
-			.."_".. sd.buyoutPrice 
-			.."_".. sd.nextBid 
-			.."_".. sd.timeLeft 
-			.."_".. tostring(sd.highBidder)
-			.."_".. ownerCode 
-			.."_".. dataType;
+                local key = "_".. (sd.stackSize or 0)
+                        .."_".. (sd.buyoutPrice or 0)
+                        .."_".. (sd.nextBid or 0)
+                        .."_".. (sd.timeLeft or 0)
+                        .."_".. tostring(sd.highBidder)
+                        .."_".. ownerCode
+                        .."_".. dataType;
 
 		if (conddata[key]) then
 			conddata[key].count		= conddata[key].count + 1;
@@ -789,15 +789,15 @@ function AtrScan:CondenseAndSort ()
 			data.stackSize 		= sd.stackSize;
 			data.buyoutPrice	= sd.buyoutPrice;
 			data.itemPrice		= sd.buyoutPrice / sd.stackSize;
-			data.nextBid		= sd.nextBid;
-			data.nextBidPerItem	= sd.nextBid / sd.stackSize;  -- Calculate bid price per item
+			data.nextBid            = sd.nextBid or 0;
+                        data.nextBidPerItem     = (sd.nextBid or 0) / sd.stackSize;  -- Calculate bid price per item
 			data.minpage		= sd.pagenum;
 			data.maxpage		= sd.pagenum;
 			data.count			= 1;
 			data.type			= dataType;
 			data.yours			= (ownerCode == "y");
 			data.hasActiveBids	= sd.hasActiveBids;
-			data.timeLeft		= sd.timeLeft;
+			data.timeLeft           = sd.timeLeft or 0;
 			data.timeLeftStr = ({ "0m +", "30m ++", "2h +++", "12h ++++" })[sd.timeLeft or 0] or "???"
 			data.owner			= sd.owner;
 			data.highBidder	= sd.highBidder;
