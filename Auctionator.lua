@@ -25,6 +25,8 @@ BROWSE_COLUMNS = {
 local browseSortCol = "PerItem"
 local browseSortAsc = true
 
+local gSellPriceCache = {}
+
 local BROWSE_SORT_FUNCS = {
   CurrentBid = function(a) return a.nextBidPerItem or 0 end,
   PerItem    = function(a) return a.itemPrice end,
@@ -2741,45 +2743,59 @@ function Atr_OnNewAuctionUpdate()
 
 	if (gPrevSellItemLink ~= auctionLink) then
 
-		gPrevSellItemLink = auctionLink;
-		
-		if (auctionLink) then
-			gJustPosted_ItemName = nil;
-			Atr_AddToItemLinkCache (auctionItemName, auctionLink);
-			Atr_ClearList();		-- better UE
-			gSellPane:SetToShowCurrent();
-		end
-		
-		MoneyInputFrame_SetCopper (Atr_StackPrice, 0);
-		MoneyInputFrame_SetCopper (Atr_StartingPrice,  0);
-		Atr_ResetDuration();
-		
-		if (gJustPosted_ItemName == nil) then
-			local cacheHit = gSellPane:DoSearch (auctionItemName, true, AUCTIONATOR_CACHE_THRESHOLD);
-			
-			gSellPane.totalItems	= Atr_GetNumItemInBags (auctionItemName);
-			gSellPane.fullStackSize = auctionLink and (select (8, GetItemInfo (auctionLink))) or 0;
+                if (gPrevSellItemLink) then
+                        gSellPriceCache[gPrevSellItemLink] = {
+                                stack = MoneyInputFrame_GetCopper(Atr_StackPrice),
+                                start = MoneyInputFrame_GetCopper(Atr_StartingPrice)
+                        };
+                end
 
-			local prefNumStacks, prefStackSize = Atr_GetSellStacking (auctionLink, auctionCount, gSellPane.totalItems);
-			
-			if (time() - gAutoSingleton < 5) then
-				Atr_SetInitialStacking (1, 1);
-			else
-				Atr_SetInitialStacking (prefNumStacks, prefStackSize);
-			end
-			
-			if (cacheHit) then
-				Atr_OnSearchComplete ();
-			end
-			
-			Atr_SetTextureButton ("Atr_SellControls_Tex", Atr_StackSize(), auctionLink);
-			Atr_SellControls_TexName:SetText (auctionItemName);
-		else
-			Atr_SetTextureButton ("Atr_SellControls_Tex", 0, nil);
-			Atr_SellControls_TexName:SetText ("");
-		end
-		
-	elseif (Atr_StackSize() ~= auctionCount) then
+                gPrevSellItemLink = auctionLink;
+
+                if (auctionLink) then
+                        gJustPosted_ItemName = nil;
+                        Atr_AddToItemLinkCache (auctionItemName, auctionLink);
+                        Atr_ClearList();                -- better UE
+                        gSellPane:SetToShowCurrent();
+                end
+
+                local cacheHit = false;
+
+                if (gJustPosted_ItemName == nil) then
+                        cacheHit = gSellPane:DoSearch (auctionItemName, true, AUCTIONATOR_CACHE_THRESHOLD);
+
+                        gSellPane.totalItems    = Atr_GetNumItemInBags (auctionItemName);
+                        gSellPane.fullStackSize = auctionLink and (select (8, GetItemInfo (auctionLink))) or 0;
+
+                        local prefNumStacks, prefStackSize = Atr_GetSellStacking (auctionLink, auctionCount, gSellPane.totalItems);
+
+                        if (time() - gAutoSingleton < 5) then
+                                Atr_SetInitialStacking (1, 1);
+                        else
+                                Atr_SetInitialStacking (prefNumStacks, prefStackSize);
+                        end
+
+                        if (cacheHit) then
+                                local prev = gSellPriceCache[auctionLink];
+                                if (prev) then
+                                        MoneyInputFrame_SetCopper (Atr_StackPrice, prev.stack);
+                                        MoneyInputFrame_SetCopper (Atr_StartingPrice, prev.start);
+                                end
+                                Atr_OnSearchComplete ();
+                        else
+                                MoneyInputFrame_SetCopper (Atr_StackPrice, 0);
+                                MoneyInputFrame_SetCopper (Atr_StartingPrice, 0);
+                                Atr_ResetDuration();
+                        end
+
+                        Atr_SetTextureButton ("Atr_SellControls_Tex", Atr_StackSize(), auctionLink);
+                        Atr_SellControls_TexName:SetText (auctionItemName);
+                else
+                        Atr_SetTextureButton ("Atr_SellControls_Tex", 0, nil);
+                        Atr_SellControls_TexName:SetText ("");
+                end
+
+        elseif (Atr_StackSize() ~= auctionCount) then
 	
 		local prefNumStacks, prefStackSize = Atr_GetSellStacking (auctionLink, auctionCount, gSellPane.totalItems);
 
