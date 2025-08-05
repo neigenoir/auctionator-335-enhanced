@@ -281,14 +281,14 @@
 				</FontString>
 
 				<FontString name="Atr_CacheAge_Text" inherits="GameFontHighlightSmall" text="">
-						<Anchors><Anchor point="TOPLEFT" relativeTo="Atr_Recommend_Text"><Offset><AbsDimension x="0" y="-20"/></Offset></Anchor></Anchors>
+						<Anchors><Anchor point="TOPLEFT" relativeTo="Atr_Recommend_Text"><Offset><AbsDimension x="0" y="-19"/></Offset></Anchor></Anchors>
 						<Font>
 								<Color r="0.7" g="0.7" b="0.7"/>
 						</Font>
 				</FontString>
 
 				<FontString name="Atr_ItemInfo_Total_Text" inherits="GameFontHighlightSmall" text="">
-						<Anchors><Anchor point="TOPLEFT" relativeTo="Atr_CacheAge_Text"><Offset><AbsDimension x="0" y="-15"/></Offset></Anchor></Anchors>
+						<Anchors><Anchor point="TOPLEFT" relativeTo="Atr_CacheAge_Text"><Offset><AbsDimension x="0" y="-18"/></Offset></Anchor></Anchors>
 				</FontString>
 
 				<FontString name="Atr_ItemInfo_Auc_Text" inherits="GameFontHighlightSmall" text="">
@@ -300,7 +300,7 @@
 				</FontString>
 
 				<FontString name="Atr_ItemInfo_P5_Text" inherits="GameFontHighlightSmall" text="">
-						<Anchors><Anchor point="TOPLEFT" relativeTo="Atr_ItemInfo_Total_Text"><Offset><AbsDimension x="160" y="0"/></Offset></Anchor></Anchors>
+						<Anchors><Anchor point="TOPLEFT" relativeTo="Atr_ItemInfo_Total_Text"><Offset><AbsDimension x="120" y="0"/></Offset></Anchor></Anchors>
 				</FontString>
 
                 <FontString name="Atr_ItemInfo_P10_Text" inherits="GameFontHighlightSmall" text="">

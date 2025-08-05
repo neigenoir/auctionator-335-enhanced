@@ -864,7 +864,7 @@ function Atr_Init()
 	if (not Atr_RefreshButton_Custom) then
 		local button = CreateFrame("Button", "Atr_RefreshButton_Custom", Atr_Main_Panel, "UIPanelButtonTemplate");
 		button:SetSize(60, 16);
-		button:SetPoint("TOPLEFT", Atr_Recommend_Text, "TOPLEFT", 160, -17);
+		button:SetPoint("TOPLEFT", Atr_Recommend_Text, "TOPLEFT", 128, -14);
 		button:SetText(ZT("Refresh"));
 		button:EnableMouse(true);
 		button:SetFrameLevel(Atr_Main_Panel:GetFrameLevel() + 10); -- Higher z-order
