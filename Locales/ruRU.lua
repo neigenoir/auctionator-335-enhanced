@@ -264,7 +264,10 @@ AtrL["Refresh"] = "Обновить"
 AtrL["Current Bid"] = "Текущая ставка"
 AtrL["no bids"] = "нет ставок"
 AtrL["n/a"] = "н/д"
-AtrL["Ставка"] = "Ставка"
-AtrL["Выкуп"] = "Выкуп"
+AtrL["Bid"] = "Ставка"
+AtrL["Buyout"] = "Выкуп"
+AtrL["Quantity"] = "Кол-во"
+AtrL["Time Left"] = "Время"
+AtrL["Seller"] = "Продавец"
 
 end

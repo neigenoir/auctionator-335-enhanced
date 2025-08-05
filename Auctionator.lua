@@ -10,6 +10,151 @@ local zc = addonTable.zc;
 
 gAtrZC = addonTable.zc;		-- share with AuctionatorDev
 
+local gCurrentPane
+
+-- Column descriptors used for building browse rows and headings
+BROWSE_COLUMNS = {
+  {name = "CurrentBid", width = 120, heading = "Bid"},
+  {name = "PerItem",    width = 120, heading = "Buyout"},
+  {name = "Quantity",   width = 90,  heading = "Quantity"},
+  {name = "TimeLeft",   width = 60,  heading = "Time Left"},
+  {name = "Owner",      width = 80,  heading = "Seller"},
+}
+
+local browseSortCol = "PerItem"
+local browseSortAsc = true
+
+local BROWSE_SORT_FUNCS = {
+  CurrentBid = function(a) return a.nextBidPerItem or 0 end,
+  PerItem    = function(a) return a.itemPrice end,
+  Quantity   = function(a) return (a.count or 0) * (a.stackSize or 0) end,
+  TimeLeft   = function(a) return a.timeLeft or 0 end,
+  Owner      = function(a) return string.lower(a.owner or "") end,
+}
+
+function Atr_UpdateBrowseArrows()
+  for _, col in ipairs(BROWSE_COLUMNS) do
+    if col.button then
+      local arrow = col.button:GetNormalTexture()
+      if col.name == browseSortCol then
+        arrow:Show()
+        if browseSortAsc then
+          arrow:SetTexCoord(0, 0.5625, 0, 1)
+        else
+          arrow:SetTexCoord(0, 0.5625, 1, 0)
+        end
+      else
+        arrow:Hide()
+      end
+    end
+  end
+end
+
+function Atr_HideAllColumns()
+  for _, col in ipairs(BROWSE_COLUMNS) do
+    if col.button then
+      col.button:Hide()
+    end
+  end
+end
+
+function Atr_ShowAllColumns()
+  for _, col in ipairs(BROWSE_COLUMNS) do
+    if col.button then
+      local text = ZT and ZT(col.heading) or col.heading
+      col.button:SetText(text)
+      col.button:Show()
+    end
+  end
+end
+
+function Atr_BuildBrowseHeaders(parent)
+  local prev
+  for _, col in ipairs(BROWSE_COLUMNS) do
+    local button = CreateFrame("Button", "Atr_BrowseHeading"..col.name, parent, "Atr_Col_Heading_Template")
+    button:SetSize(col.width, 20)
+    local text = ZT and ZT(col.heading) or col.heading
+    button:SetText(text)
+    if prev then
+      button:SetPoint("TOPLEFT", prev, "TOPRIGHT", 5, 0)
+    else
+      button:SetPoint("TOPLEFT", parent, "TOPLEFT", 20, -21)
+    end
+    button:SetScript("OnClick", function() Atr_SortBrowseColumn(col.name) end)
+    col.button = button
+    prev = button
+  end
+  Atr_ShowAllColumns()
+  Atr_UpdateBrowseArrows()
+end
+
+function Atr_BuildBrowseEntry(row)
+  local prev
+  for _, col in ipairs(BROWSE_COLUMNS) do
+    local frame = CreateFrame("Frame", row:GetName() .. "_" .. col.name, row)
+    frame:SetSize(col.width, 16)
+    if frame.SetClipsChildren then
+      frame:SetClipsChildren(true)
+    end
+    if prev then
+      frame:SetPoint("LEFT", prev, "RIGHT", 5, 0)
+    else
+      frame:SetPoint("LEFT", row, "LEFT", 0, 0)
+    end
+
+    if col.name == "CurrentBid" or col.name == "PerItem" then
+      local price = CreateFrame("Frame", frame:GetName().."_Price", frame, "SmallMoneyFrameTemplate")
+      price:SetPoint("RIGHT", frame, "RIGHT", 0, 0)
+      SmallMoneyFrame_OnLoad(price)
+      MoneyFrame_SetType(price, "AUCTION")
+
+      if col.name == "PerItem" then
+        local text = frame:CreateFontString(frame:GetName().."_Text", "BACKGROUND", "GameFontDarkGraySmall")
+        text:SetPoint("CENTER", frame, "CENTER", 0, 1)
+        text:SetWidth(col.width)
+        text:SetJustifyH("CENTER")
+        text:SetWordWrap(false)
+      end
+    else
+      local justify = "RIGHT"
+      if col.name == "Owner" then
+        justify = "CENTER"
+      end
+      local text = frame:CreateFontString(frame:GetName().."_Text", "BACKGROUND", "GameFontHighlightSmall")
+      text:SetJustifyH(justify)
+      text:SetPoint("RIGHT", frame, "RIGHT", 0, 1)
+      text:SetWidth(col.width)
+      text:SetWordWrap(false)
+    end
+
+    prev = frame
+  end
+end
+
+function Atr_SortBrowseColumn(colName)
+  local sorter = BROWSE_SORT_FUNCS[colName]
+  if not sorter or not gCurrentPane or not gCurrentPane.activeScan then return end
+  if browseSortCol == colName then
+    browseSortAsc = not browseSortAsc
+  else
+    browseSortCol = colName
+    browseSortAsc = true
+  end
+  table.sort(gCurrentPane.activeScan.sortedData, function(a, b)
+    local av, bv = sorter(a), sorter(b)
+    if av == bv then
+      return a.itemPrice < b.itemPrice
+    end
+    if browseSortAsc then
+      return av < bv
+    else
+      return av > bv
+    end
+  end)
+  Atr_UpdateBrowseArrows()
+  FauxScrollFrame_SetOffset(AuctionatorScrollFrame, 0)
+  gCurrentPane.UINeedsUpdate = true
+end
 
 -----------------------------------------
 
@@ -128,8 +273,6 @@ local gSellPane;
 local gMorePane;
 local gActivePane;
 local gShopPane;
-
-local gCurrentPane;
 
 local gHistoryItemList = {};
 
@@ -1584,12 +1727,7 @@ end
 
 function Atr_ClearList ()
 
-	Atr_NextBid_Heading:Hide();
-	Atr_Buyout_Heading:Hide();
-	Atr_Stacks_Heading:Hide();
-
-	Atr_NextBid_Button:Hide();
-	Atr_Stacks_Button:Hide();
+       Atr_HideAllColumns();
 
 
 	local line;							-- 1 through 12 of our window to scroll
@@ -1637,10 +1775,14 @@ end
 
 function Atr_ShowItemNameAndTexture(itemName)
 
-	AuctionatorMessageFrame:Hide();
-	AuctionatorMessage2Frame:Hide();
+        AuctionatorMessageFrame:Hide();
+        AuctionatorMessage2Frame:Hide();
 
-	local scn = gCurrentPane.activeScan;
+        if (not gCurrentPane or not gCurrentPane.activeScan) then
+                return;
+        end
+
+        local scn = gCurrentPane.activeScan;
 
 	local color = "";
 	if (scn and not scn:IsNil()) then
@@ -1660,12 +1802,16 @@ end
 -----------------------------------------
 
 function Atr_GetCacheAgeText()
-	
-	local scn = gCurrentPane.activeScan;
-	
-	if (not scn or scn:IsNil() or scn.whenScanned == 0) then
-		return "";
-	end
+
+        if (not gCurrentPane or not gCurrentPane.activeScan) then
+                return "";
+        end
+
+        local scn = gCurrentPane.activeScan;
+
+        if (scn:IsNil() or scn.whenScanned == 0) then
+                return "";
+        end
 	
 	local ageSeconds = time() - scn.whenScanned;
 	
@@ -2572,12 +2718,12 @@ function Atr_UpdateUI ()
 
 		gCurrentPane.UINeedsUpdate = false;
 
-		if (Atr_ShowingSearchSummary()) then
-			Atr_ShowSearchSummary();
-			if (gCurrentPane.activeSearch) then
-				gCurrentPane.activeSearch:UpdateArrows();
-			end
-		elseif (gCurrentPane:ShowCurrent()) then
+               if (Atr_ShowingSearchSummary()) then
+                       Atr_ShowSearchSummary();
+                       if (gCurrentPane.activeSearch) then
+                               gCurrentPane.activeSearch:UpdateArrows();
+                       end
+               elseif (gCurrentPane:ShowCurrent()) then
 			PanelTemplates_SetTab(Atr_ListTabs, 1);
 			Atr_ShowCurrentAuctions();
 		elseif (gCurrentPane:ShowHistory()) then
@@ -3457,11 +3603,7 @@ end
 -----------------------------------------
 
 function Atr_ShowSearchSummary()
-
-	Atr_NextBid_Heading:Hide();
-	Atr_Buyout_Heading:Hide();
-	Atr_Stacks_Heading:Hide();
-
+       Atr_HideAllColumns();
 	if (gCurrentPane.activeSearch) then
 		gCurrentPane.activeSearch:UpdateArrows();
 	end
@@ -3552,27 +3694,18 @@ end
 -----------------------------------------
 
 function Atr_ShowCurrentAuctions()
+       Atr_HideAllColumns();
 
-	Atr_NextBid_Heading:Hide();
-	Atr_Buyout_Heading:Hide();
-	Atr_Stacks_Heading:Hide();
+       local numrows = #gCurrentPane.activeScan.sortedData;
 
+       if (numrows > 0) then
+               Atr_ShowAllColumns();
+               Atr_UpdateBrowseArrows();
 
-	local numrows = #gCurrentPane.activeScan.sortedData;
-
-	if (numrows > 0) then
-		Atr_NextBid_Heading:Show();
-		Atr_Buyout_Heading:Show();
-		Atr_Stacks_Heading:Show();
-
-		if (gCurrentPane.activeSearch) then
-			gCurrentPane.activeSearch:UpdateArrows();
-		end
-	end
-
-	Atr_NextBid_Heading:SetText (ZT("Ставка"));
-	Atr_Buyout_Heading:SetText (ZT("Выкуп"));
-	Atr_Stacks_Heading:SetText (ZT("Current Auctions"));
+               if (gCurrentPane.activeSearch) then
+                       gCurrentPane.activeSearch:UpdateArrows();
+               end
+       end
 
 	local line		 = 0;															-- 1 through 12 of our window to scroll
 	local dataOffset = FauxScrollFrame_GetOffset (AuctionatorScrollFrame);			-- an index into our data calculated from the scroll offset
@@ -3672,19 +3805,19 @@ function Atr_ShowHistory ()
 		Atr_FindBestHistoricalAuction ();
 	end
 		
-	Atr_NextBid_Heading:Hide();
-	Atr_Buyout_Heading:Hide();
-	Atr_Stacks_Heading:Hide();
+	Atr_HideAllColumns();
 
-	Atr_Stacks_Heading:SetText (ZT("History"));
+	local stacksCol = BROWSE_COLUMNS[#BROWSE_COLUMNS];
+	if stacksCol and stacksCol.button then
+		stacksCol.button:SetText (ZT("History"));
+	end
 
 	local numrows = gCurrentPane.sortedHist and #gCurrentPane.sortedHist or 0;
 
---zc.msg ("gCurrentPane.sortedHist: "..numrows,1,0,0);
-
 	if (numrows > 0) then
-		Atr_NextBid_Heading:Show();
-		Atr_Stacks_Heading:Show();
+		local bidCol = BROWSE_COLUMNS[1];
+		if bidCol and bidCol.button then bidCol.button:Show(); end
+		if stacksCol and stacksCol.button then stacksCol.button:Show(); end
 
 		if (not gCurrentPane.activeSearch) then
 			gCurrentPane.activeSearch = {};
