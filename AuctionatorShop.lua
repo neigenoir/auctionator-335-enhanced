@@ -250,13 +250,15 @@ function Atr_Shop_OnFinishScan ()
 		
 	end
 
-	if (#currentPane.activeScan.sortedData > 0) then
-		currentPane.currIndex = 1;
-	end
+        if (#currentPane.activeScan.sortedData > 0) then
+                currentPane.currIndex = 1;
+        end
 
-	currentPane.UINeedsUpdate = true;
-	
-	Atr_Search_Button:Enable();
+        Atr_UpdateItemInfo();
+
+        currentPane.UINeedsUpdate = true;
+
+        Atr_Search_Button:Enable();
 end
 
 
