@@ -4045,6 +4045,7 @@ function Atr_HighlightEntry(entryIndex)
 
 	local doEnableCancel = false;
 	local doEnableBuy = false;
+	local doEnableBid = false;
 	local data;
 	
 	if (Atr_ShowingCurrentAuctions() and entryIndex ~= nil and entryIndex > 0 and entryIndex <= #gCurrentPane.activeScan.sortedData) then
@@ -4056,9 +4057,14 @@ function Atr_HighlightEntry(entryIndex)
 		if (not data.yours and not data.altname and data.buyoutPrice > 0) then
 			doEnableBuy = true;
 		end
+		
+		if (not data.yours and not data.highBidder and data.nextBid and data.nextBid > 0) then
+			doEnableBid = true;
+		end
 	end
 
 	Atr_Buy1_Button:Disable();
+	Atr_Bid_Button:Disable();
 	Atr_CancelSelectionButton:Disable();
 	
 	if (doEnableCancel) then
@@ -4073,6 +4079,10 @@ function Atr_HighlightEntry(entryIndex)
 
 	if (doEnableBuy) then
 		Atr_Buy1_Button:Enable();
+	end
+	
+	if (doEnableBid) then
+		Atr_Bid_Button:Enable();
 	end
 	
 end
