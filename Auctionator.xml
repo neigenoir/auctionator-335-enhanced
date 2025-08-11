@@ -546,7 +546,7 @@
 						<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
 					</Button>
 					
-					<Frame name="Atr_StackPrice" inherits="MoneyInputFrameTemplate">
+					<Frame name="Atr_StackPrice" inherits="MoneyInputFrameTemplate" autoFocus="false">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="Atr_StackPriceText" relativePoint="BOTTOMLEFT">
 								<Offset><AbsDimension x="8" y="-2"/></Offset>
@@ -556,11 +556,18 @@
 							<OnLoad>
 								MoneyInputFrame_SetOnValueChangedFunc(self, Atr_StackPriceChangedFunc);
 								Atr_StackPriceGold:SetJustifyH("CENTER");
+								-- Internal tab cycling for money fields
+								Atr_StackPriceGold:SetScript("OnTabPressed", function() Atr_StackPriceSilver:SetFocus(); end);
+								Atr_StackPriceSilver:SetScript("OnTabPressed", function() Atr_StackPriceCopper:SetFocus(); end);
+								Atr_StackPriceCopper:SetScript("OnTabPressed", function() Atr_ItemPriceGold:SetFocus(); end);
 							</OnLoad>
+							<OnTabPressed>
+								Atr_ItemPriceGold:SetFocus();
+							</OnTabPressed>
 						</Scripts>
 					</Frame>
 
-					<Frame name="Atr_ItemPrice" inherits="MoneyInputFrameTemplate">
+					<Frame name="Atr_ItemPrice" inherits="MoneyInputFrameTemplate" autoFocus="false">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="Atr_ItemPriceText" relativePoint="BOTTOMLEFT">
 								<Offset><AbsDimension x="8" y="-2"/></Offset>
@@ -570,11 +577,18 @@
 							<OnLoad>
 								MoneyInputFrame_SetOnValueChangedFunc(self, Atr_ItemPriceChangedFunc);
 								Atr_ItemPriceGold:SetJustifyH("CENTER");
+								-- Internal tab cycling for money fields
+								Atr_ItemPriceGold:SetScript("OnTabPressed", function() Atr_ItemPriceSilver:SetFocus(); end);
+								Atr_ItemPriceSilver:SetScript("OnTabPressed", function() Atr_ItemPriceCopper:SetFocus(); end);
+								Atr_ItemPriceCopper:SetScript("OnTabPressed", function() Atr_Batch_NumAuctions:SetFocus(); end);
 							</OnLoad>
+							<OnTabPressed>
+								Atr_Batch_NumAuctions:SetFocus();
+							</OnTabPressed>
 						</Scripts>
 					</Frame>
 
-					<Frame name="Atr_StartingPrice" inherits="MoneyInputFrameTemplate" hidden="true">
+					<Frame name="Atr_StartingPrice" inherits="MoneyInputFrameTemplate" autoFocus="false" hidden="true">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="Atr_StartingPriceText" relativePoint="BOTTOMLEFT">
 								<Offset><AbsDimension x="5" y="-2"/></Offset>
@@ -583,6 +597,10 @@
 						<Scripts>
 							<OnLoad>
 								Atr_StartingPriceGold:SetJustifyH("CENTER");
+								-- Internal tab cycling for money fields
+								Atr_StartingPriceGold:SetScript("OnTabPressed", function() Atr_StartingPriceSilver:SetFocus(); end);
+								Atr_StartingPriceSilver:SetScript("OnTabPressed", function() Atr_StartingPriceCopper:SetFocus(); end);
+								Atr_StartingPriceCopper:SetScript("OnTabPressed", function() Atr_ItemPriceGold:SetFocus(); end);
 							</OnLoad>
 						</Scripts>
 					</Frame>
@@ -612,7 +630,7 @@
 						<FontString inherits="ChatFontNormal" bytes="64" justifyH="CENTER" />
 						<Scripts>
 							<OnTextChanged>		Atr_StackSizeChangedFunc()		</OnTextChanged>
-							<OnTabPressed>		Atr_Batch_NumAuctions:SetFocus()	</OnTabPressed>
+							<OnTabPressed>		Atr_ItemPriceGold:SetFocus()	</OnTabPressed>
 						</Scripts>
 					</EditBox>
 					
